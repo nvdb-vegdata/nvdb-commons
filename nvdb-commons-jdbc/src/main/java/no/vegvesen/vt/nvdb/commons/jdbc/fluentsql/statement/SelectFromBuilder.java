@@ -1,0 +1,28 @@
+package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement;
+
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Table;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
+
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
+
+public class SelectFromBuilder {
+    private boolean distinct;
+    private List<Projection> projections;
+
+    SelectFromBuilder(boolean distinct, Projection... projections) {
+        this.distinct = distinct;
+        this.projections = asList(requireNonEmpty(projections, "No projections specified"));
+    }
+
+    public SelectFromBuilder distinct() {
+        this.distinct = true;
+        return this;
+    }
+
+    public SelectStatement from(Table... tables) {
+        return new SelectStatement(distinct, projections, asList(requireNonEmpty(tables, "No tables specified")));
+    }
+}
