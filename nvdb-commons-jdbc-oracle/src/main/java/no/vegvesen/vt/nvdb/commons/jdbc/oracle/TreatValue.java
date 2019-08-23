@@ -3,7 +3,6 @@ package no.vegvesen.vt.nvdb.commons.jdbc.oracle;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 public class TreatValue<T extends ObjectType> implements ObjectFunction, Projection {

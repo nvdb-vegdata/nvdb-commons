@@ -1,6 +1,5 @@
 package no.vegvesen.vt.nvdb.commons.jdbc.oracle.datamodel;
 
-
 import no.vegvesen.vt.nvdb.commons.jdbc.oracle.ObjectType;
 import no.vegvesen.vt.nvdb.commons.jdbc.oracle.ObjectTypeField;
 

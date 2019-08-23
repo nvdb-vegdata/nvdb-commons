@@ -24,7 +24,7 @@ public class InsertBatchStatementTest {
         Collection<Person> persons = asList(
                 new Person(1, "Ole", "11111111111", Optional.of("123 45 678")),
                 new Person(2, "Dole", "22222222222", Optional.empty()),
-                new Person(3, "Doffen", "33333333333", Optional.of("345 67 890")));
+                new Person(3, "Doffen", null, Optional.of("345 67 890")));
 
         statement =
             insertBatch(persons).into(PERSON)
@@ -38,14 +38,14 @@ public class InsertBatchStatementTest {
     public void shouldBuildValidSql() {
         final String expectedSql =
                 "insert into PERSON (ID, NAME, SSN, PHONE_NO) "
-              + "values (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?)";
+              + "values (?, ?, ?, ?), (?, ?, ?, null), (?, ?, null, ?)";
 
         assertThat(statement.sql(context()), equalTo(expectedSql));
     }
 
     @Test
     public void shouldCollectArgsInCorrectOrder() {
-        Object[] expectedArgs = {1, "Ole", "11111111111", "123 45 678", 2, "Dole", "22222222222", null, 3, "Doffen", "33333333333", "345 67 890"};
+        Object[] expectedArgs = {1, "Ole", "11111111111", "123 45 678", 2, "Dole", "22222222222", 3, "Doffen", "345 67 890"};
         assertThat(statement.params(), contains(expectedArgs));
     }
 

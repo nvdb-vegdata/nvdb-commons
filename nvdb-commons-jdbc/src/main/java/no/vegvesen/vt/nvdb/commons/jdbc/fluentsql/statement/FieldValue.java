@@ -7,6 +7,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.Function;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A field-value pair used in UPDATE and INSERT statements.
@@ -16,7 +17,7 @@ class FieldValue {
     private final Object value;
 
     FieldValue(Field field, Object value) {
-        this.field = field;
+        this.field = requireNonNull(field, "No field specified");
         this.value = value;
     }
 
