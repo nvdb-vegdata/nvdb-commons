@@ -1,0 +1,12 @@
+/.idea/
+/nvdb-commons-core/.idea/
+/nvdb-commons-jdbc/.idea/
+/nvdb-commons-jdbc-oracle/.idea/
+/nvdb-commons-jdbc-oracle/nvdbcommons-jdbc.iml
+/nvdb-commons-jdbc-oracle/nvdbcommons-jdbc-oracle.iml
+/nvdb-commons-jdbc/nvdbcommons-jdbc.iml
+/nvdb-commons-core/nvdbcommons-core.iml
+/nvdb-commons-lang/.idea/
+/nvdb-commons-core/target/
+/nvdb-commons-jdbc/target/
+/nvdb-commons-jdbc-oracle/target/
