@@ -7,6 +7,8 @@
     <artifactId>nvdbcommons-jdbc-oracle</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <packaging>jar</packaging>
+
     <properties>
         <nvdbcommons-core.version>1.0-SNAPSHOT</nvdbcommons-core.version>
         <nvdbcommons-jdbc.version>1.0-SNAPSHOT</nvdbcommons-jdbc.version>
