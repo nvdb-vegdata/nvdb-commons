@@ -16,7 +16,7 @@ public class ObjectTypeField implements Projection {
     }
 
     @Override
-    public ObjectTypeField as(String alias) {
+    public Projection as(String alias) {
         this.alias = requireNonNull(alias, "No alias specified");
         return this;
     }

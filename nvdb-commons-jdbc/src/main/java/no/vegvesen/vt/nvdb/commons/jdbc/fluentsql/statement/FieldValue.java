@@ -6,6 +6,11 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.Function;
 
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
+/**
+ * A field-value pair used in UPDATE and INSERT statements.
+ */
 class FieldValue {
     private final Field field;
     private final Object value;
@@ -24,7 +29,9 @@ class FieldValue {
     }
 
     String valueSql(Context context) {
-        if (isParameterized()) {
+        if (isNull(value)) {
+            return "null";
+        } else if (isParameterized()) {
             return "?";
         } else {
             Function function = (Function)value;

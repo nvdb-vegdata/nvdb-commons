@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.datamodel.TestDataModel.PERSON;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.Statements.delete;
-import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.Statements.deleteFrom;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;

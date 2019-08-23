@@ -2,6 +2,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 
 import static java.util.Objects.requireNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank;
@@ -16,7 +17,7 @@ public class Max implements AggregateFunction {
     }
 
     @Override
-    public AggregateFunction as(String alias) {
+    public Projection as(String alias) {
         this.alias = requireNonBlank(alias, "No alias specified");
         return this;
     }

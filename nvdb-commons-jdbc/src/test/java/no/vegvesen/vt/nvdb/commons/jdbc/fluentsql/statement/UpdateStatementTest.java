@@ -61,6 +61,24 @@ public class UpdateStatementTest {
         assertThat(statement.params(), contains(expectedParams));
     }
 
+    @Test
+    public void shouldAllowNullValues() {
+        String zip = null;
+        PreparableStatement statement =
+                update(ADDRESS)
+                        .set(ADDRESS.ZIP, zip)
+                        .where(ADDRESS.ZIP.eq("7088"));
+
+        final String expectedSql =
+                "update ADDRESS "
+                        + "set ZIP = null "
+                        + "where ZIP = ?";
+        Object[] expectedParams = {"7088"};
+
+        assertThat(statement.sql(context()), equalTo(expectedSql));
+        assertThat(statement.params(), contains(expectedParams));
+    }
+
     private Context context() {
         return Context.of(new MySqlDialect());
     }

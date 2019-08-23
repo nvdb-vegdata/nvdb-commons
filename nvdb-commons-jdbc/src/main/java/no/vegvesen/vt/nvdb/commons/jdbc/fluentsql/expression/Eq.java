@@ -13,10 +13,10 @@ public class Eq implements Expression {
 
     public Eq(Field operand, Object value) {
         if (value instanceof Field) {
-            throw new IllegalArgumentException("Use EqField instead");
+            throw new IllegalArgumentException("Use EqField for expressions with field operand");
         }
         this.operand = requireNonNull(operand, "No operand specified");
-        this.value = requireNonNull(value, "No value specified");
+        this.value = requireNonNull(value, "Use IsNull for expressions with SQL NULL operand");
     }
 
     @Override

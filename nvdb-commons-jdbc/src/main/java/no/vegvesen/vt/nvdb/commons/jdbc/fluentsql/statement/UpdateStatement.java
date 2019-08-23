@@ -4,6 +4,7 @@ import no.vegvesen.vt.nvdb.commons.core.functional.Optionals;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Table;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.constant.Constant;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.Function;
 
@@ -30,6 +31,14 @@ public class UpdateStatement extends PreparableStatement {
         this.expressions = new LinkedList<>();
     }
 
+    public UpdateStatement set(Field field, Constant constant) {
+        fieldValues.add(
+                new FieldValue(
+                        requireNonNull(field, "No field specified"),
+                        requireNonNull(constant, "No constant specified").value()));
+        return this;
+    }
+
     public UpdateStatement set(Field field, Function function) {
         fieldValues.add(
                 new FieldValue(
@@ -42,7 +51,7 @@ public class UpdateStatement extends PreparableStatement {
         fieldValues.add(
                 new FieldValue(
                         requireNonNull(field, "No field specified"),
-                        requireNonNull(value, "No value specified")));
+                        value));
         return this;
     }
 

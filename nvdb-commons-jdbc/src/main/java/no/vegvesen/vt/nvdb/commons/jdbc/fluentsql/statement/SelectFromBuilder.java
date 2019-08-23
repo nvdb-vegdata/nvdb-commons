@@ -6,6 +6,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.require;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 
 public class SelectFromBuilder {
@@ -15,6 +16,8 @@ public class SelectFromBuilder {
     SelectFromBuilder(boolean distinct, Projection... projections) {
         this.distinct = distinct;
         this.projections = asList(requireNonEmpty(projections, "No projections specified"));
+
+        require(() -> !this.projections.contains(null), "Use nullValue() to provide an SQL NULL projection");
     }
 
     public SelectFromBuilder distinct() {

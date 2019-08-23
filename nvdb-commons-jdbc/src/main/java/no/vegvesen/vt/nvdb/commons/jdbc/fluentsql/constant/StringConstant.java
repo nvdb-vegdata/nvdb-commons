@@ -2,6 +2,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.constant;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -9,7 +10,6 @@ import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank
 
 public class StringConstant implements Constant {
     private final String value;
-    private Field replacedField;
     private String alias;
 
     public StringConstant(String value) {
@@ -17,14 +17,19 @@ public class StringConstant implements Constant {
     }
 
     @Override
-    public StringConstant as(String alias) {
+    public Object value() {
+        return value;
+    }
+
+    @Override
+    public Projection as(String alias) {
         this.alias = requireNonBlank(alias, "No alias specified");
         return this;
     }
 
     @Override
-    public StringConstant forField(Field field) {
-        this.replacedField = requireNonNull(field, "No field specified");
+    public Projection forField(Field field) {
+        requireNonNull(field, "No field specified");
         this.alias = field.alias();
         return this;
     }

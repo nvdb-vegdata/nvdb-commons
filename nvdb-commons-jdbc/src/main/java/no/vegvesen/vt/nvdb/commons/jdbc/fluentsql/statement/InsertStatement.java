@@ -4,6 +4,7 @@ import no.vegvesen.vt.nvdb.commons.core.functional.Optionals;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Table;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.constant.Constant;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.Function;
 
 import java.util.LinkedList;
@@ -26,6 +27,14 @@ public class InsertStatement extends PreparableStatement {
         this.fieldValues = new LinkedList<>();
     }
 
+    public InsertStatement value(Field field, Constant constant) {
+        fieldValues.add(
+                new FieldValue(
+                        requireNonNull(field, "No field specified"),
+                        requireNonNull(constant, "No constant specified").value()));
+        return this;
+    }
+
     public InsertStatement value(Field field, Function function) {
         fieldValues.add(
                 new FieldValue(
@@ -38,7 +47,7 @@ public class InsertStatement extends PreparableStatement {
         fieldValues.add(
                 new FieldValue(
                         requireNonNull(field, "No field specified"),
-                        requireNonNull(value, "No value specified")));
+                        value));
         return this;
     }
 

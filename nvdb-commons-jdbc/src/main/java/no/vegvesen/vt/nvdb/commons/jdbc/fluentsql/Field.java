@@ -41,7 +41,7 @@ public class Field implements Projection {
     }
 
     @Override
-    public Field as(String alias) {
+    public Projection as(String alias) {
         this.alias = requireNonBlank(alias, "No alias specified");
         return this;
     }

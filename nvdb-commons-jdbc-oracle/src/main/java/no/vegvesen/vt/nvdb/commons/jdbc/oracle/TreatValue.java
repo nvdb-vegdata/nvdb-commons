@@ -16,7 +16,7 @@ public class TreatValue<T extends ObjectType> implements ObjectFunction, Project
     private String alias;
 
     @Override
-    public TreatValue<T> as(String alias) {
+    public Projection as(String alias) {
         this.alias = requireNonNull(alias, "No alias specified");
         return this;
     }
@@ -32,6 +32,6 @@ public class TreatValue<T extends ObjectType> implements ObjectFunction, Project
 
     @Override
     public String sql(Context context) {
-        return "treat(" + valueAs.sql(context) + ")" + (nonNull(alias()) ? " " + alias() : "");
+        return "treat(" + valueAs.sql(context) + ")";
     }
 }
