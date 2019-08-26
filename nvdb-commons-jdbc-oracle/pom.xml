@@ -3,9 +3,15 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <name>NVDB Commons JDBC Oracle</name>
+
     <groupId>no.vegvesen.vt.nvdb.commons</groupId>
     <artifactId>nvdbcommons-jdbc-oracle</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <organization>
+        <name>Statens vegvesen</name>
+    </organization>
 
     <packaging>jar</packaging>
 
@@ -33,6 +39,7 @@
         <mockito.version>1.9.5</mockito.version>
         <hamcrest.version>1.3</hamcrest.version>
         <junitparams.version>1.0.5</junitparams.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -72,6 +79,21 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -91,5 +113,30 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <id>opensource.kantega.no-locallibs</id>
+            <url>https://opensource.kantega.no/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>opensource.kantega.no-snapshots</id>
+            <name>Kantega OpenSource - Snapshots</name>
+            <url>https://opensource.kantega.no/nexus/content/repositories/snapshots/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
