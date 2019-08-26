@@ -9,6 +9,11 @@
 
     <packaging>jar</packaging>
 
+    <scm>
+        <connection>scm:git:git@github.com:nvdb-vegdata/nvdb-commons.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
     <distributionManagement>
         <snapshotRepository>
             <id>svv-artifactory-snapshots</id>

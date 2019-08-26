@@ -9,6 +9,22 @@
 
     <packaging>jar</packaging>
 
+    <scm>
+        <connection>scm:git:git@github.com:nvdb-vegdata/nvdb-commons.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>svv-artifactory-snapshots</id>
+            <url>https://artrepo.vegvesen.no/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+        <repository>
+            <id>svv-artifactory-releases</id>
+            <url>https://artrepo.vegvesen.no/artifactory/libs-release-local</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <nvdbcommons-core.version>1.0-SNAPSHOT</nvdbcommons-core.version>
         <nvdbcommons-jdbc.version>1.0-SNAPSHOT</nvdbcommons-jdbc.version>
