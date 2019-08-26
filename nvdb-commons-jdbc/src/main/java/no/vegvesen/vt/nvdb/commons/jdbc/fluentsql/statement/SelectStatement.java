@@ -28,7 +28,7 @@ import static no.vegvesen.vt.nvdb.commons.core.functional.Functions.castTo;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Optionals.mapIfNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Predicates.instanceOf;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Predicates.not;
-import static no.vegvesen.vt.nvdb.commons.core.string.StringHelper.isBlank;
+import static no.vegvesen.vt.nvdb.commons.core.lang.StringHelper.isBlank;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Command.SELECT;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.Capability.LIMIT_OFFSET;
 

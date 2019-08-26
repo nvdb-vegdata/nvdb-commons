@@ -28,7 +28,7 @@ public final class Predicates {
      * @param inner the predicate to be negated
      * @return the predicate
      */
-    public static <T> Predicate<? super T> not(Predicate<? super T> inner) {
+    public static <T> Predicate<T> not(Predicate<T> inner) {
         return inner.negate();
     }
 
@@ -66,5 +66,13 @@ public final class Predicates {
      */
     public static <T> Predicate<? super T> sameAs(T other) {
         return o -> o == other;
+    }
+
+    /**
+     * Predicate that always returns true.
+     * @return the predicate
+     */
+    public static <T> Predicate<T> alwaysTrue() {
+        return o -> true;
     }
 }

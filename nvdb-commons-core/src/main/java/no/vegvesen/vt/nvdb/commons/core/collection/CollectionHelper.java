@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -14,6 +16,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Functions.castTo;
@@ -22,8 +25,7 @@ import static no.vegvesen.vt.nvdb.commons.core.functional.Functions.castTo;
  * Helper functions for collections
  */
 public final class CollectionHelper {
-    private CollectionHelper() {}
-
+    @SafeVarargs
     public static <T> Set<T> asSet(T... items) {
         if (isNull(items)) {
             return new HashSet<>();
@@ -32,6 +34,7 @@ public final class CollectionHelper {
         }
     }
 
+    @SafeVarargs
     public static <T> List<T> asList(T... items) {
         if (isNull(items)) {
             return new ArrayList<>();
@@ -54,8 +57,16 @@ public final class CollectionHelper {
         return isNull(collection) || collection.isEmpty();
     }
 
+    public static boolean isEmpty(Map<?,?> map) {
+        return isNull(map) || map.isEmpty();
+    }
+
     public static boolean nonEmpty(Collection<?> collection) {
         return nonNull(collection) && !collection.isEmpty();
+    }
+
+    public static boolean nonEmpty(Map<?,?> map) {
+        return nonNull(map) && !map.isEmpty();
     }
 
     public static <T> Collection<List<T>> partition(Collection<T> items, int batchSize) {
@@ -71,27 +82,58 @@ public final class CollectionHelper {
     }
 
     /**
-     * Returns a list containing all items in both first and second list
+     * Returns a list containing all items in given collections
      */
-    public static <T> List<T> concat(List<T> first, List<T> second) {
-        List<T> result = new ArrayList<>(first);
-        result.addAll(second);
-        return result;
+    @SafeVarargs
+    public static <T> List<T> concat(Collection<? extends T>... collections) {
+        return streamIfNonNull(collections).flatMap(CollectionHelper::streamIfNonNull).collect(toList());
     }
 
     /**
-     * Returns a list containing the items of first list not found in second list
+     * Returns a set containing all items in given sets
      */
-    public static <T> List<T> subtract(List<T> first, List<T> second) {
+    @SafeVarargs
+    public static <T> Set<T> concat(Set<? extends T>... sets) {
+        return streamIfNonNull(sets).flatMap(CollectionHelper::streamIfNonNull).collect(toSet());
+    }
+
+    /**
+     * Returns a map containing all items in given maps
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> concat(Map<K, ? extends V>... maps) {
+        return streamIfNonNull(maps).flatMap(m -> m.entrySet().stream()).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * Returns a list containing the items of first collection not found in second collection
+     */
+    public static <T> List<T> subtract(Collection<T> first, Collection<T> second) {
         List<T> result = new ArrayList<>(first);
         result.removeIf(second::contains);
         return result;
     }
 
     /**
-     * Returns a list where each element in the original list is casted to the given target class.
+     * Returns a set containing the items of first set not found in second set
+     */
+    public static <T> Set<T> subtract(Set<T> first, Set<T> second) {
+        Set<T> result = new HashSet<>(first);
+        result.removeIf(second::contains);
+        return result;
+    }
+
+    /**
+     * Returns a list where each element in the original list is up-casted to the given target class.
      */
     public static <T, S extends T> List<T> castListElements(List<S> list, Class<T> targetClass) {
+        return list.stream().map(castTo(targetClass)).collect(toList());
+    }
+
+    /**
+     * Returns a list where each element in the original list is down-casted to the given target class.
+     */
+    public static <S, T extends S> List<T> downcastListElements(List<S> list, Class<T> targetClass) {
         return list.stream().map(castTo(targetClass)).collect(toList());
     }
 
@@ -109,6 +151,7 @@ public final class CollectionHelper {
     /**
      * Returns the stream of the given array, or an empty stream if the array is null or empty.
      */
+    @SafeVarargs
     public static <T> Stream<T> streamIfNonNull(T... items) {
         if (items == null) {
             return Stream.empty();
@@ -125,6 +168,64 @@ public final class CollectionHelper {
     }
 
     public static <T> Predicate<T> existsInCollection(Collection <T> collection) {
-        return element -> collection.stream().anyMatch(e -> e.equals(element));
+        return existsInCollection(collection, Objects::equals);
+    }
+
+    public static <T> Predicate<T> existsInCollection(Collection <T> collection, BiPredicate<T, T> condition) {
+        return item -> collection.stream().anyMatch(collectionItem -> condition.test(collectionItem, item));
+    }
+
+    /**
+     * Returns the lowest value in a Collection of Double values.
+     * @throws IllegalArgumentException if the collection didn't contain any double values.
+     */
+    public static Double minValue(Collection<Double> collection) {
+        return collection.stream()
+                .mapToDouble(v -> v)
+                .min()
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    /**
+     * Returns the highest value in a Collection of Double values.
+     * @throws IllegalArgumentException if the collection didn't contain any double values.
+     */
+    public static Double maxValue(Collection<Double> collection) {
+        return collection.stream()
+                .mapToDouble(v -> v)
+                .max()
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    public static boolean containsIgnoreCase(Collection<String> collection, String item) {
+        return streamIfNonNull(collection).anyMatch(i -> isNull(i) ? isNull(item) : i.equalsIgnoreCase(item));
+    }
+
+    /**
+     * Returns true if the two collections contain the same items, but not necessarily in the same order.
+     * @param first the first collection
+     * @param second the second collection
+     * @return true if the collections contain the same items; else false
+     */
+    public static boolean isSame(Collection<?> first, Collection<?> second) {
+        return first.size() == second.size() && first.containsAll(second);
+    }
+
+    /**
+     * Returns true if the two collections contain the same strings, regardless of casing, and not necessarily in the same order.
+     * @param first the first collection
+     * @param second the second collection
+     * @return true if the collections contain the same strings (case insensitive); else false
+     */
+    public static boolean isSameIgnoreCase(Collection<String> first, Collection<String> second) {
+        if (isNull(first)) {
+            return isNull(second);
+        } else if (isNull(second)) {
+            return false;
+        } else if (first.size() != second.size()) {
+            return false;
+        } else {
+            return first.stream().allMatch(s -> containsIgnoreCase(second, s));
+        }
     }
 }

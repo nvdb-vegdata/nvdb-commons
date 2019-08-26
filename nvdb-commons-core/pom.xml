@@ -21,6 +21,8 @@
     </distributionManagement>
 
     <properties>
+        <commons-math.version>3.6.1</commons-math.version>
+        <slf4j.version>1.7.5</slf4j.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.9.5</mockito.version>
         <hamcrest.version>1.3</hamcrest.version>
@@ -28,6 +30,16 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>${commons-math.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

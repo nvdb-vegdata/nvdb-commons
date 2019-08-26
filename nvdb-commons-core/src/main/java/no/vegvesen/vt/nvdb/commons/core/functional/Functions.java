@@ -1,5 +1,10 @@
 package no.vegvesen.vt.nvdb.commons.core.functional;
 
+import no.vegvesen.vt.nvdb.commons.core.lang.StringHelper;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 import static java.util.Objects.nonNull;
@@ -30,5 +35,13 @@ public final class Functions {
      */
     public static <S, T> Function<S,T> ifNonNull(Function<S,T> mapper) {
         return s -> nonNull(s) ? mapper.apply(s) : (T)null;
+    }
+
+    public static Function<String, List<String>> split(String regex) {
+        return ifNonNull(s -> StringHelper.split(s, regex));
+    }
+
+    public static BinaryOperator<LocalDate> earliestDate() {
+        return (a, b) -> a == null ? b : (b == null ? a : (a.compareTo(b) < 0 ? a : b));
     }
 }

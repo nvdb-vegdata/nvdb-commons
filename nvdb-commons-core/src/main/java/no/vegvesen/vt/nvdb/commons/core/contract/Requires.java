@@ -6,11 +6,17 @@ import no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper;
 import java.util.Collection;
 
 import static java.util.Objects.requireNonNull;
-import static no.vegvesen.vt.nvdb.commons.core.string.StringHelper.nonBlank;
+import static no.vegvesen.vt.nvdb.commons.core.lang.StringHelper.nonBlank;
 
 public final class Requires {
 
     private Requires() {}
+
+    public static int[] requireNonEmpty(int[] array, String msg, Object... args) {
+        requireNonNull(array, String.format(msg, args));
+        require(() -> ArrayHelper.nonEmpty(array), msg, args);
+        return array;
+    }
 
     public static long[] requireNonEmpty(long[] array, String msg, Object... args) {
         requireNonNull(array, String.format(msg, args));

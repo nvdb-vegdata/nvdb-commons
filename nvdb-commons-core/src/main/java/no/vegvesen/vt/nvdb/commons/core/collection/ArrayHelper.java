@@ -9,12 +9,20 @@ import static java.util.Objects.nonNull;
 public final class ArrayHelper {
     private ArrayHelper() {}
 
+    public static boolean isEmpty(int[] array) {
+        return isNull(array) || array.length == 0;
+    }
+
     public static boolean isEmpty(long[] array) {
         return isNull(array) || array.length == 0;
     }
 
     public static <T> boolean isEmpty(T[] array) {
         return isNull(array) || array.length == 0;
+    }
+
+    public static boolean nonEmpty(int[] array) {
+        return nonNull(array) && array.length > 0;
     }
 
     public static boolean nonEmpty(long[] array) {
