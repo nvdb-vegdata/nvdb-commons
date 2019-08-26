@@ -5,13 +5,13 @@
 
     <groupId>no.vegvesen.vt.nvdb.commons</groupId>
     <artifactId>nvdbcommons-jdbc</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <packaging>jar</packaging>
 
     <scm>
         <connection>scm:git:git@github.com:nvdb-vegdata/nvdb-commons.git</connection>
-        <tag>HEAD</tag>
+        <tag>nvdbcommons-jdbc-1.0</tag>
     </scm>
 
     <distributionManagement>
