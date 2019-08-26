@@ -16,17 +16,17 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>svv-artifactory-snapshots</id>
-            <url>https://artrepo.vegvesen.no/artifactory/libs-snapshot-local</url>
+            <id>opensource.kantega.no</id>
+            <url>http://opensource.kantega.no/nexus/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>svv-artifactory-releases</id>
-            <url>https://artrepo.vegvesen.no/artifactory/libs-release-local</url>
+            <id>opensource.kantega.no</id>
+            <url>http://opensource.kantega.no/nexus/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
     <properties>
-        <nvdbcommons-core.version>1.0</nvdbcommons-core.version>
+        <nvdbcommons-core.version>1.1</nvdbcommons-core.version>
         <slf4j.version>1.7.5</slf4j.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.9.5</mockito.version>

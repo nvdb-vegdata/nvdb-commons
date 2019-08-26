@@ -16,12 +16,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>svv-artifactory-snapshots</id>
-            <url>https://artrepo.vegvesen.no/artifactory/libs-snapshot-local</url>
+            <id>opensource.kantega.no</id>
+            <url>http://opensource.kantega.no/nexus/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>svv-artifactory-releases</id>
-            <url>https://artrepo.vegvesen.no/artifactory/libs-release-local</url>
+            <id>opensource.kantega.no</id>
+            <url>http://opensource.kantega.no/nexus/content/repositories/releases</url>
         </repository>
     </distributionManagement>
 
