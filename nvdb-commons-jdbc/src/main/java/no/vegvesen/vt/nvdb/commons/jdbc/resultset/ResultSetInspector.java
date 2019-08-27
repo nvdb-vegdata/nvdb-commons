@@ -69,6 +69,13 @@ public class ResultSetInspector {
         return getInt(columnName).orElse(null);
     }
 
+    public Optional<Integer> getInt(int columnIndex) {
+        return wrapSqlException(() -> {
+            Integer value = rs.getInt(columnIndex);
+            return rs.wasNull() ? Optional.empty() : Optional.of(value);
+        });
+    }
+
     //
     // Long
     //
@@ -136,6 +143,13 @@ public class ResultSetInspector {
 
     public String getStringOrNull(String columnName) {
         return getString(columnName).orElse(null);
+    }
+
+    public Optional<String> getString(int columnIndex) {
+        return wrapSqlException(() -> {
+            String value = rs.getString(columnIndex);
+            return Optional.ofNullable(value);
+        });
     }
 
     //
