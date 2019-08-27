@@ -32,6 +32,14 @@ public class Statements {
         return new DeleteStatement(table);
     }
 
+    public static TruncateTableBuilder truncate() {
+        return new TruncateTableBuilder();
+    }
+
+    public static TruncateStatement truncateTable(Table table) {
+        return new TruncateStatement(table);
+    }
+
     public static InsertIntoBuilder insert() {
         return new InsertIntoBuilder();
     }
