@@ -11,14 +11,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static no.vegvesen.vt.nvdb.commons.core.functional.Optionals.mapIfNonNull;
 
 public class ResultSetHelper {
+
+    public static ResultSetMapper<Void> forEach(Consumer<ResultSet> consumer) {
+        return rs -> {
+            while (rs.next()) {
+                consumer.accept(rs);
+            }
+            return null;
+        };
+    }
+
     public static <T> ResultSetMapper<List<T>> toObjectList(Function<ResultSet, T> objectMapper) {
         return rs -> {
-            List<T> objects = new LinkedList<T>();
+            List<T> objects = new LinkedList<>();
             while (rs.next()) {
                 objects.add(objectMapper.apply(rs));
             }
@@ -28,7 +39,7 @@ public class ResultSetHelper {
 
     public static <T> ResultSetMapper<Set<T>> toObjectSet(Function<ResultSet, T> objectMapper) {
         return rs -> {
-            Set<T> objects = new LinkedHashSet<T>();
+            Set<T> objects = new LinkedHashSet<>();
             while (rs.next()) {
                 objects.add(objectMapper.apply(rs));
             }
