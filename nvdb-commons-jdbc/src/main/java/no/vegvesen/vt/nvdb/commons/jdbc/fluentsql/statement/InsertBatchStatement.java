@@ -4,6 +4,7 @@ import no.vegvesen.vt.nvdb.commons.core.functional.Optionals;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Table;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.OracleDialect;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -43,17 +44,47 @@ public class InsertBatchStatement<T> extends PreparableStatement {
         context.command(INSERT);
         validate();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into ").append(table.sql(context));
-        sb.append(" (");
-        sb.append(fieldValueExtractors().map(fve -> fve.field().sql(context)).collect(joining(", ")));
-        sb.append(") values ");
-        sb.append(entities().map(e -> "("
-                + fieldValueExtractors().map(fve -> fve.valueSql(context, e)).collect(joining(", "))
-                + ")")
-                .collect(joining(", ")));
+        if (context.getDialect() instanceof OracleDialect) {
+            // INSERT ALL
+            //   INTO t (col1, col2, col3) VALUES ('val1_1', 'val1_2', 'val1_3')
+            //   INTO t (col1, col2, col3) VALUES ('val2_1', 'val2_2', 'val2_3')
+            //   INTO t (col1, col2, col3) VALUES ('val3_1', 'val3_2', 'val3_3')
+            // SELECT 1 FROM DUAL;
 
-        return sb.toString();
+            StringBuilder sb = new StringBuilder();
+            sb.append("insert all");
+            entities().forEach(e -> {
+                sb.append(" into ").append(table.sql(context));
+                sb.append(" (");
+                sb.append(fieldValueExtractors().map(fve -> fve.field().sql(context)).collect(joining(", ")));
+                sb.append(") values (");
+                sb.append(fieldValueExtractors().map(fve -> fve.valueSql(context, e)).collect(joining(", ")));
+                sb.append(")");
+            });
+
+            sb.append(" select 1 from DUAL");
+
+            return sb.toString();
+        } else {
+            // INSERT INTO t
+            //   (col1, col2, col3)
+            // VALUES
+            //   ('val1_1', 'val1_2', 'val1_3'),
+            //   ('val2_1', 'val2_2', 'val2_3'),
+            //   ('val3_1', 'val3_2', 'val3_3');
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("insert into ").append(table.sql(context));
+            sb.append(" (");
+            sb.append(fieldValueExtractors().map(fve -> fve.field().sql(context)).collect(joining(", ")));
+            sb.append(") values ");
+            sb.append(entities().map(e -> "("
+                    + fieldValueExtractors().map(fve -> fve.valueSql(context, e)).collect(joining(", "))
+                    + ")")
+                    .collect(joining(", ")));
+
+            return sb.toString();
+        }
     }
 
     private Stream<? extends T> entities() {

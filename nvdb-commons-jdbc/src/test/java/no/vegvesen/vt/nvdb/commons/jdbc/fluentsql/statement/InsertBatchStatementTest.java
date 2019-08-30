@@ -2,6 +2,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.MySqlDialect;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.OracleDialect;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.domainmodel.Person;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,20 @@ public class InsertBatchStatementTest {
     }
 
     @Test
-    public void shouldBuildValidSql() {
+    public void shouldBuildValidSqlForOracle() {
+        final String expectedSql =
+                "insert all"
+                 + " into PERSON (ID, NAME, SSN, PHONE_NO) values (?, ?, ?, ?)"
+                 + " into PERSON (ID, NAME, SSN, PHONE_NO) values (?, ?, ?, null)"
+                 + " into PERSON (ID, NAME, SSN, PHONE_NO) values (?, ?, null, ?)"
+              + " select 1 from DUAL";
+
+        Context oracleContext = Context.of(new OracleDialect());
+        assertThat(statement.sql(oracleContext), equalTo(expectedSql));
+    }
+
+    @Test
+    public void shouldBuildValidSqlForNonOracle() {
         final String expectedSql =
                 "insert into PERSON (ID, NAME, SSN, PHONE_NO) "
               + "values (?, ?, ?, ?), (?, ?, ?, null), (?, ?, null, ?)";
