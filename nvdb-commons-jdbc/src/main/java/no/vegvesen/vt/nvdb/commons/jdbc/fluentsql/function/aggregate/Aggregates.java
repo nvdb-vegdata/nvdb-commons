@@ -14,4 +14,8 @@ public abstract class Aggregates {
     public static Count count(Field field) {
         return new Count(field);
     }
+
+    public static Sum sum(Field field) {
+        return new Sum(field);
+    }
 }
