@@ -4,16 +4,22 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Eq;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqField;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqSubQuery;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Ge;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.GeField;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Gt;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.GtField;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.In;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.IsNull;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Le;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LeField;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Like;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Lt;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LtField;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.AggregateFunction;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Count;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Max;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Min;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Sum;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Ascending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
@@ -76,6 +82,19 @@ public class Field implements Projection {
         return new LtField(this, requireNonNull(other, "No field specified"));
     }
 
+    public Expression le(Object value) {
+        return new Le(this, requireNonNull(value, "No value specified"));
+    }
+
+    public Optional<Expression> le(Optional<?> value) {
+        requireNonNull(value, "No value specified");
+        return value.map(v -> new Le(this, v));
+    }
+
+    public Expression le(Field other) {
+        return new LeField(this, requireNonNull(other, "No field specified"));
+    }
+
     public Expression gt(Object value) {
         return new Gt(this, requireNonNull(value, "No value specified"));
     }
@@ -87,6 +106,19 @@ public class Field implements Projection {
 
     public Expression gt(Field other) {
         return new GtField(this, requireNonNull(other, "No field specified"));
+    }
+
+    public Expression ge(Object value) {
+        return new Ge(this, requireNonNull(value, "No value specified"));
+    }
+
+    public Optional<Expression> ge(Optional<?> value) {
+        requireNonNull(value, "No value specified");
+        return value.map(v -> new Ge(this, v));
+    }
+
+    public Expression ge(Field other) {
+        return new GeField(this, requireNonNull(other, "No field specified"));
     }
 
     public Expression in(Object... values) {
@@ -118,6 +150,15 @@ public class Field implements Projection {
         });
     }
 
+    public Expression like(String pattern) {
+        return new Like(this, requireNonNull(pattern, "No pattern specified"));
+    }
+
+    public Optional<Expression> like(Optional<String> pattern) {
+        requireNonNull(pattern, "No pattern specified");
+        return pattern.map(p -> new Like(this, p));
+    }
+
     public Expression isNull() {
         return new IsNull(this);
     }
@@ -132,6 +173,10 @@ public class Field implements Projection {
 
     public AggregateFunction count() {
         return new Count(this);
+    }
+
+    public AggregateFunction sum() {
+        return new Sum(this);
     }
 
     public Join on(Field other) {
