@@ -40,8 +40,8 @@ public class SelectStatement extends PreparableStatement {
     private List<Field> groups;
     private List<Order> orders;
     private boolean distinct;
-    private Integer limit;
-    private Integer offset;
+    private Long limit;
+    private Long offset;
 
     SelectStatement(boolean distinct, List<Projection> projections, List<Table> tables) {
         this.distinct = distinct;
@@ -117,12 +117,12 @@ public class SelectStatement extends PreparableStatement {
         return this;
     }
 
-    public SelectStatement limit(int limit) {
+    public SelectStatement limit(long limit) {
         this.limit = limit;
         return this;
     }
 
-    public SelectStatement offset(int offset) {
+    public SelectStatement offset(long offset) {
         this.offset = offset;
         return this;
     }
@@ -195,12 +195,12 @@ public class SelectStatement extends PreparableStatement {
         return sb.toString();
     }
 
-    private StringBuilder addLimitOffsetFallback(Context context, StringBuilder innerSql, Integer limit, Integer offset) {
+    private StringBuilder addLimitOffsetFallback(Context context, StringBuilder innerSql, Long limit, Long offset) {
         String rowNum = context.getDialect().getRowNumLiteral().orElseThrow(
                 () -> new RuntimeException("Dialect " + context.getDialect().getProductName() + " has no ROWNUM literal"));
 
-        Integer fromRow = mapIfNonNull(offset, o -> o + 1);
-        Integer toRow = mapIfNonNull(limit, l -> (offset != null ? offset : 0) + l);
+        Long fromRow = mapIfNonNull(offset, o -> o + 1);
+        Long toRow = mapIfNonNull(limit, l -> (offset != null ? offset : 0) + l);
 
         if (nonNull(fromRow) && nonNull(toRow)) {
             String limitSql = "select original.*, {ROWNUM} row_no from ( " + innerSql.toString() + " ) original where {ROWNUM} <= ?";

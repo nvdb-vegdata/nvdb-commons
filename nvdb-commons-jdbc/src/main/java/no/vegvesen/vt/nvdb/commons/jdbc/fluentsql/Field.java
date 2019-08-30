@@ -15,11 +15,6 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LeField;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Like;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Lt;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LtField;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.AggregateFunction;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Count;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Max;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Min;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Sum;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Ascending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
@@ -161,22 +156,6 @@ public class Field implements Projection {
 
     public Expression isNull() {
         return new IsNull(this);
-    }
-
-    public AggregateFunction max() {
-        return new Max(this);
-    }
-
-    public AggregateFunction min() {
-        return new Min(this);
-    }
-
-    public AggregateFunction count() {
-        return new Count(this);
-    }
-
-    public AggregateFunction sum() {
-        return new Sum(this);
     }
 
     public Join on(Field other) {

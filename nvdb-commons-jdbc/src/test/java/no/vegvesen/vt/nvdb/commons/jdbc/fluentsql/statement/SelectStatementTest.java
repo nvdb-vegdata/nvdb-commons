@@ -57,7 +57,7 @@ public class SelectStatementTest {
 
     @Test
     public void shouldCollectArgsInCorrectOrder() {
-        Object[] expectedParams = {"17016812345", "7089", "7088", "NOR", "SWE", "DEN", 10, 90};
+        Object[] expectedParams = {"17016812345", "7089", "7088", "NOR", "SWE", "DEN", 10L, 90L};
         assertThat(statement.params(), contains(expectedParams));
     }
 
