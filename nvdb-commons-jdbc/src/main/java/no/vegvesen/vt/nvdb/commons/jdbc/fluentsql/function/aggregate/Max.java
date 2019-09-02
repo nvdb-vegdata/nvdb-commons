@@ -4,6 +4,8 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 
+import java.util.Optional;
+
 import static java.util.Objects.requireNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank;
 
@@ -23,8 +25,8 @@ public class Max implements AggregateFunction {
     }
 
     @Override
-    public Field field() {
-        return field;
+    public Optional<Field> field() {
+        return Optional.of(field);
     }
 
     @Override

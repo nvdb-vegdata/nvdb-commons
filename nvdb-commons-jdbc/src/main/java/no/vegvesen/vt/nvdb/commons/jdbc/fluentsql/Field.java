@@ -166,6 +166,10 @@ public class Field implements Projection {
         return new Ascending(this);
     }
 
+    public Order ascIf(boolean condition) {
+        return condition ? asc() : desc();
+    }
+
     public Order desc() {
         return new Descending(this);
     }

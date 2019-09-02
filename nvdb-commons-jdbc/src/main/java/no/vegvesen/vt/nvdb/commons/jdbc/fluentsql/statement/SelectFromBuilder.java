@@ -6,6 +6,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.require;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 
@@ -27,5 +28,9 @@ public class SelectFromBuilder {
 
     public SelectStatement from(Table... tables) {
         return new SelectStatement(distinct, projections, asList(requireNonEmpty(tables, "No tables specified")));
+    }
+
+    public SelectStatement from(SelectStatement subQuery) {
+        return new SelectStatement(distinct, projections, requireNonNull(subQuery, "No subquery specified"));
     }
 }

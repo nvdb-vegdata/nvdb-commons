@@ -19,10 +19,15 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper.isEmpty;
+import static no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper.streamIfNonNull;
+import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.require;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Functions.castTo;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Optionals.mapIfNonNull;
@@ -36,6 +41,7 @@ public class SelectStatement extends PreparableStatement {
     private List<Projection> projections;
     private List<Table> tables;
     private List<Join> joins;
+    private SelectStatement subQueryFrom;
     private List<Expression> expressions;
     private List<Field> groups;
     private List<Order> orders;
@@ -48,6 +54,18 @@ public class SelectStatement extends PreparableStatement {
         this.projections = requireNonEmpty(projections, "No projections specified");
         this.tables = requireNonEmpty(tables, "No tables specified");
         this.joins = new LinkedList<>();
+        this.subQueryFrom = null;
+        this.expressions = new LinkedList<>();
+        this.groups = new LinkedList<>();
+        this.orders = new LinkedList<>();
+    }
+
+    SelectStatement(boolean distinct, List<Projection> projections, SelectStatement subQueryFrom) {
+        this.distinct = distinct;
+        this.projections = requireNonEmpty(projections, "No projections specified");
+        this.tables = null;
+        this.joins = null;
+        this.subQueryFrom = requireNonNull(subQueryFrom, "No subquery specified");
         this.expressions = new LinkedList<>();
         this.groups = new LinkedList<>();
         this.orders = new LinkedList<>();
@@ -55,6 +73,7 @@ public class SelectStatement extends PreparableStatement {
 
     public SelectStatement join(Join... joins) {
         requireNonEmpty(joins, "No joins specified");
+        require(() -> isNull(subQueryFrom), "Can't combine a subquery 'from' clause with joins");
         this.joins.addAll(asList(joins));
         return this;
     }
@@ -62,6 +81,7 @@ public class SelectStatement extends PreparableStatement {
     @SafeVarargs
     public final SelectStatement joinIf(boolean condition, Supplier<Join>... joinSuppliers) {
         requireNonEmpty(joins, "No join suppliers specified");
+        require(() -> isNull(subQueryFrom), "Can't combine a subquery 'from' clause with joins");
         if (condition) {
             Arrays.stream(joinSuppliers).map(Supplier::get).forEach(this.joins::add);
         }
@@ -132,9 +152,6 @@ public class SelectStatement extends PreparableStatement {
         context.command(SELECT);
         validate();
 
-        // Tables that are joined with should not be specified in the FROM clause
-        Set<Table> joinedTables = joins.stream().map(Join::joined).collect(toSet());
-
         StringBuilder sb = new StringBuilder();
         sb.append("select ");
         if (distinct) {
@@ -146,16 +163,26 @@ public class SelectStatement extends PreparableStatement {
                 .collect(joining(", ")));
 
         sb.append(" from ");
-        sb.append(tables.stream()
-                .filter(not(joinedTables::contains))
-                .map(t -> t.sql(context))
-                .collect(joining(", ")));
 
-        if (!joins.isEmpty()) {
-            sb.append(" ");
-            sb.append(joins.stream()
-                    .map(j -> j.sql(context))
-                    .collect(joining(" ")));
+        if (nonNull(subQueryFrom)) {
+            sb.append("(");
+            sb.append(subQueryFrom.sql(context));
+            sb.append(")");
+        } else {
+            // Tables that are joined with should not be specified in the FROM clause
+            Set<Table> joinedTables = joins.stream().map(Join::joined).collect(toSet());
+
+            sb.append(tables.stream()
+                    .filter(not(joinedTables::contains))
+                    .map(t -> t.sql(context))
+                    .collect(joining(", ")));
+
+            if (!joins.isEmpty()) {
+                sb.append(" ");
+                sb.append(joins.stream()
+                        .map(j -> j.sql(context))
+                        .collect(joining(" ")));
+            }
         }
 
         if (!expressions.isEmpty()) {
@@ -221,7 +248,14 @@ public class SelectStatement extends PreparableStatement {
 
     @Override
     public List<Object> params() {
-        List<Object> params = expressions.stream().flatMap(Expression::params).collect(toList());
+        List<Object> params = new LinkedList<>();
+
+        if (nonNull(subQueryFrom)) {
+            params.addAll(subQueryFrom.params());
+        }
+
+        expressions.stream().flatMap(Expression::params).forEach(params::add);
+
         if (nonNull(limit)) {
             params.add(limit);
         }
@@ -232,24 +266,38 @@ public class SelectStatement extends PreparableStatement {
     }
 
     private void validate() {
-        if (tables.isEmpty()) {
+        if (isEmpty(tables) && isNull(subQueryFrom)) {
             throw new IllegalStateException("No FROM clause specified");
         }
 
-        List<Field> projectedFields = projections.stream().filter(instanceOf(Field.class)).map(castTo(Field.class)).collect(toList());
+        List<Field> projectedFields = projections.stream()
+                .filter(instanceOf(Field.class))
+                .map(castTo(Field.class))
+                .collect(toList());
         validateFieldTableRelations(projectedFields.stream());
 
-        List<Field> projectedFunctionFields = projections.stream().filter(instanceOf(FieldFunction.class)).map(castTo(FieldFunction.class)).map(FieldFunction::field).collect(toList());
+        List<Field> projectedFunctionFields = projections.stream()
+                .filter(instanceOf(FieldFunction.class))
+                .map(castTo(FieldFunction.class))
+                .map(FieldFunction::field)
+                .flatMap(Optionals::stream)
+                .collect(toList());
         validateFieldTableRelations(projectedFunctionFields.stream());
 
-        validateFieldTableRelations(joins.stream().flatMap(Join::fields));
+        if (nonNull(subQueryFrom)) {
+            subQueryFrom.validate();
+        }
+        if (nonNull(joins)) {
+            validateFieldTableRelations(joins.stream().flatMap(Join::fields));
+        }
+
         validateFieldTableRelations(expressions.stream().flatMap(Expression::fields));
         validateFieldTableRelations(groups.stream());
         validateFieldTableRelations(orders.stream().flatMap(Order::fields));
     }
 
     private void validateFieldTableRelations(Stream<Field> fields) {
-        Set<String> tableNames = Stream.concat(tables.stream(), joins.stream().map(Join::joined))
+        Set<String> tableNames = Stream.concat(streamIfNonNull(tables), streamIfNonNull(joins).map(Join::joined))
                 .map(Table::name).collect(toSet());
         fields
             .filter(f -> !tableNames.contains(f.table().name()))

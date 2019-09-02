@@ -99,6 +99,13 @@ public class ResultSetInspector {
         return getLong(columnName).orElse(null);
     }
 
+    public Optional<Long> getLong(int columnIndex) {
+        return wrapSqlException(() -> {
+            Long value = rs.getLong(columnIndex);
+            return rs.wasNull() ? Optional.empty() : Optional.of(value);
+        });
+    }
+
     //
     // Double
     //

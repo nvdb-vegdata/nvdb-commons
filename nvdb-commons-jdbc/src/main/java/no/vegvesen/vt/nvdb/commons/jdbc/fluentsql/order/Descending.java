@@ -2,25 +2,26 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
 public class Descending implements Order {
-    private Field field;
+    private Projection projection;
 
-    public Descending(Field field) {
-        this.field = requireNonNull(field, "No field specified");
+    public Descending(Projection projection) {
+        this.projection = requireNonNull(projection, "No projection specified");
     }
 
     @Override
     public String sql(Context context) {
-        return field.sql(context) + " desc";
+        return projection.sql(context) + " desc";
     }
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(field);
+        return projection instanceof Field ? Stream.of((Field)projection) : Stream.empty();
     }
 }

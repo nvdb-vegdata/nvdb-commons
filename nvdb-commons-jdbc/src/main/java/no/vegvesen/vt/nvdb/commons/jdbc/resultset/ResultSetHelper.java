@@ -69,6 +69,10 @@ public class ResultSetHelper {
         };
     }
 
+    public static ResultSetMapper<Long> toSingleLong() {
+        return toSingleton(rsi -> rsi.getLong(1).orElseThrow(ResultSetHelper::emptyResultSet));
+    }
+
     public static ResultSetMapper<Integer> toSingleInteger() {
         return toSingleton(rsi -> rsi.getInt(1).orElseThrow(ResultSetHelper::emptyResultSet));
     }

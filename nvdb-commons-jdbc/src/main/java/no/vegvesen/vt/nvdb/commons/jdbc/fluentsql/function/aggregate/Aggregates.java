@@ -15,6 +15,10 @@ public abstract class Aggregates {
         return new Count(field);
     }
 
+    public static CountAll countAll() {
+        return new CountAll();
+    }
+
     public static Sum sum(Field field) {
         return new Sum(field);
     }
