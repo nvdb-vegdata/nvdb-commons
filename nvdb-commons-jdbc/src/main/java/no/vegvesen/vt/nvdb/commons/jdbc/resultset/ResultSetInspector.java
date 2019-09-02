@@ -287,4 +287,24 @@ public class ResultSetInspector {
     public byte[] getBytesOrNull(String columnName) {
         return getBytes(columnName).orElse(null);
     }
+
+    //
+    // Object
+    //
+
+    public Optional<Object> getObject(Field field) {
+        return getObject(field.alias());
+    }
+
+    public Object getObjectOrNull(Field field) {
+        return getObject(field).orElse(null);
+    }
+
+    public Optional<Object> getObject(String columnName) {
+        return wrapSqlException(() -> Optional.ofNullable(rs.getObject(columnName)));
+    }
+
+    public Object getObjectOrNull(String columnName) {
+        return getObject(columnName).orElse(null);
+    }
 }
