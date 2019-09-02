@@ -52,7 +52,7 @@ public class ResultSetHelper {
         return rs -> {
             ResultSetInspector rsi = ResultSetInspector.from(rs);
             if (rs.next()) {
-                return Optional.of(objectMapper.map(rsi));
+                return Optional.ofNullable(objectMapper.map(rsi));
             }
             return Optional.empty();
         };
