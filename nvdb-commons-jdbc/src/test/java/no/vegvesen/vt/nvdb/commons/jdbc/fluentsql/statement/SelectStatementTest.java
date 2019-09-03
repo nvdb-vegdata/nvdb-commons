@@ -14,6 +14,7 @@ import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.constant.Constants.null
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.datamodel.TestDataModel.ADDRESS;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.datamodel.TestDataModel.PERSON;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LogicalOperators.not;
+import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Aggregates.countAll;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Aggregates.max;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.Statements.select;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -94,6 +95,26 @@ public class SelectStatementTest {
                         + "from PERSON P "
                         + "where P.NAME = (select P.NAME P_NAME from PERSON P where P.SSN = ?)";
         Object[] expectedParams = {"17016812345"};
+
+        assertThat(statement.sql(context()), equalTo(expectedSql));
+        assertThat(statement.params(), contains(expectedParams));
+    }
+
+    @Test
+    public void shouldHandleSubqueriesInFromClause() {
+        PreparableStatement statement =
+                select(countAll().as("ANTALL"))
+                        .from(select(1)
+                                .from(PERSON)
+                                .where(PERSON.NAME.like("or")), "TREFF");
+
+        final String expectedSql =
+                "select count(*) ANTALL from ("
+                        + "select 1 "
+                        + "from PERSON P "
+                        + "where P.NAME like ?"
+                    + ") TREFF";
+        Object[] expectedParams = {"%or%"};
 
         assertThat(statement.sql(context()), equalTo(expectedSql));
         assertThat(statement.params(), contains(expectedParams));

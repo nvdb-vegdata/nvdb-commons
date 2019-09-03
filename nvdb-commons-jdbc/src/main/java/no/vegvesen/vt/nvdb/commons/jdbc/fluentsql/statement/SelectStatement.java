@@ -9,6 +9,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.FieldFunction;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import static no.vegvesen.vt.nvdb.commons.core.functional.Optionals.mapIfNonNull
 import static no.vegvesen.vt.nvdb.commons.core.functional.Predicates.instanceOf;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Predicates.not;
 import static no.vegvesen.vt.nvdb.commons.core.lang.StringHelper.isBlank;
+import static no.vegvesen.vt.nvdb.commons.core.lang.StringHelper.nonBlank;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Command.SELECT;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.Capability.LIMIT_OFFSET;
 
@@ -41,7 +43,7 @@ public class SelectStatement extends PreparableStatement {
     private List<Projection> projections;
     private List<Table> tables;
     private List<Join> joins;
-    private SelectStatement subQueryFrom;
+    private Subquery subqueryFrom;
     private List<Expression> expressions;
     private List<Field> groups;
     private List<Order> orders;
@@ -54,18 +56,18 @@ public class SelectStatement extends PreparableStatement {
         this.projections = requireNonEmpty(projections, "No projections specified");
         this.tables = requireNonEmpty(tables, "No tables specified");
         this.joins = new LinkedList<>();
-        this.subQueryFrom = null;
+        this.subqueryFrom = null;
         this.expressions = new LinkedList<>();
         this.groups = new LinkedList<>();
         this.orders = new LinkedList<>();
     }
 
-    SelectStatement(boolean distinct, List<Projection> projections, SelectStatement subQueryFrom) {
+    SelectStatement(boolean distinct, List<Projection> projections, Subquery subqueryFrom) {
         this.distinct = distinct;
         this.projections = requireNonEmpty(projections, "No projections specified");
         this.tables = null;
         this.joins = null;
-        this.subQueryFrom = requireNonNull(subQueryFrom, "No subquery specified");
+        this.subqueryFrom = requireNonNull(subqueryFrom, "No subquery specified");
         this.expressions = new LinkedList<>();
         this.groups = new LinkedList<>();
         this.orders = new LinkedList<>();
@@ -73,7 +75,7 @@ public class SelectStatement extends PreparableStatement {
 
     public SelectStatement join(Join... joins) {
         requireNonEmpty(joins, "No joins specified");
-        require(() -> isNull(subQueryFrom), "Can't combine a subquery 'from' clause with joins");
+        require(() -> isNull(subqueryFrom), "Can't combine a subquery 'from' clause with joins");
         this.joins.addAll(asList(joins));
         return this;
     }
@@ -81,7 +83,7 @@ public class SelectStatement extends PreparableStatement {
     @SafeVarargs
     public final SelectStatement joinIf(boolean condition, Supplier<Join>... joinSuppliers) {
         requireNonEmpty(joins, "No join suppliers specified");
-        require(() -> isNull(subQueryFrom), "Can't combine a subquery 'from' clause with joins");
+        require(() -> isNull(subqueryFrom), "Can't combine a subquery 'from' clause with joins");
         if (condition) {
             Arrays.stream(joinSuppliers).map(Supplier::get).forEach(this.joins::add);
         }
@@ -149,7 +151,7 @@ public class SelectStatement extends PreparableStatement {
 
     @Override
     public String sql(Context context) {
-        context.command(SELECT);
+        final Context localContext = context.withCommand(SELECT);
         validate();
 
         StringBuilder sb = new StringBuilder();
@@ -159,28 +161,30 @@ public class SelectStatement extends PreparableStatement {
         }
 
         sb.append(projections.stream()
-                .map(p -> p.sql(context) + (isBlank(p.alias()) ? "" : " " + p.alias()))
+                .map(p -> p.sql(localContext) + (isBlank(p.alias()) ? "" : " " + p.alias()))
                 .collect(joining(", ")));
 
         sb.append(" from ");
 
-        if (nonNull(subQueryFrom)) {
-            sb.append("(");
-            sb.append(subQueryFrom.sql(context));
-            sb.append(")");
+        if (nonNull(subqueryFrom)) {
+            sb.append(subqueryFrom.sql(context));
+            if (nonBlank(subqueryFrom.alias())) {
+                sb.append(" ");
+                sb.append(subqueryFrom.alias());
+            }
         } else {
             // Tables that are joined with should not be specified in the FROM clause
             Set<Table> joinedTables = joins.stream().map(Join::joined).collect(toSet());
 
             sb.append(tables.stream()
                     .filter(not(joinedTables::contains))
-                    .map(t -> t.sql(context))
+                    .map(t -> t.sql(localContext))
                     .collect(joining(", ")));
 
             if (!joins.isEmpty()) {
                 sb.append(" ");
                 sb.append(joins.stream()
-                        .map(j -> j.sql(context))
+                        .map(j -> j.sql(localContext))
                         .collect(joining(" ")));
             }
         }
@@ -188,21 +192,21 @@ public class SelectStatement extends PreparableStatement {
         if (!expressions.isEmpty()) {
             sb.append(" where ");
             sb.append(expressions.stream()
-                    .map(e -> e.sql(context))
+                    .map(e -> e.sql(localContext))
                     .collect(joining(" and ")));
         }
 
         if (!groups.isEmpty()) {
             sb.append(" group by ");
             sb.append(groups.stream()
-                    .map(g -> g.sql(context))
+                    .map(g -> g.sql(localContext))
                     .collect(joining(", ")));
         }
 
         if (!orders.isEmpty()) {
             sb.append(" order by ");
             sb.append(orders.stream()
-                    .map(o -> o.sql(context))
+                    .map(o -> o.sql(localContext))
                     .collect(joining(", ")));
         }
 
@@ -250,8 +254,8 @@ public class SelectStatement extends PreparableStatement {
     public List<Object> params() {
         List<Object> params = new LinkedList<>();
 
-        if (nonNull(subQueryFrom)) {
-            params.addAll(subQueryFrom.params());
+        if (nonNull(subqueryFrom)) {
+            params.addAll(subqueryFrom.params());
         }
 
         expressions.stream().flatMap(Expression::params).forEach(params::add);
@@ -266,7 +270,7 @@ public class SelectStatement extends PreparableStatement {
     }
 
     private void validate() {
-        if (isEmpty(tables) && isNull(subQueryFrom)) {
+        if (isEmpty(tables) && isNull(subqueryFrom)) {
             throw new IllegalStateException("No FROM clause specified");
         }
 
@@ -284,9 +288,6 @@ public class SelectStatement extends PreparableStatement {
                 .collect(toList());
         validateFieldTableRelations(projectedFunctionFields.stream());
 
-        if (nonNull(subQueryFrom)) {
-            subQueryFrom.validate();
-        }
         if (nonNull(joins)) {
             validateFieldTableRelations(joins.stream().flatMap(Join::fields));
         }

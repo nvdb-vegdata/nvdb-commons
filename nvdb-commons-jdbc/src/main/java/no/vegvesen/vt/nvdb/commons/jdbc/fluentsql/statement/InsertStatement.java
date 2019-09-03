@@ -60,14 +60,14 @@ public class InsertStatement extends PreparableStatement {
 
     @Override
     String sql(Context context) {
-        context.command(INSERT);
+        final Context localContext = context.withCommand(INSERT);
         validate();
 
         StringBuilder sb = new StringBuilder();
         sb.append("insert into ").append(table.sql(context));
         sb.append(" (");
-        sb.append(fieldValues.stream().map(fv -> fv.field().sql(context)).collect(joining(", ")));
-        sb.append(") values (").append(fieldValues.stream().map(fv -> fv.valueSql(context)).collect(joining(", ")));
+        sb.append(fieldValues.stream().map(fv -> fv.field().sql(localContext)).collect(joining(", ")));
+        sb.append(") values (").append(fieldValues.stream().map(fv -> fv.valueSql(localContext)).collect(joining(", ")));
         sb.append(")");
 
         return sb.toString();

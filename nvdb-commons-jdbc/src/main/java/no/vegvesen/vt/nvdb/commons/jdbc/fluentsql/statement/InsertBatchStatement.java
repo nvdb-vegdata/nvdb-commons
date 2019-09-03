@@ -41,7 +41,7 @@ public class InsertBatchStatement<T> extends PreparableStatement {
 
     @Override
     String sql(Context context) {
-        context.command(INSERT);
+        final Context localContext = context.withCommand(INSERT);
         validate();
 
         if (context.getDialect() instanceof OracleDialect) {
@@ -54,11 +54,11 @@ public class InsertBatchStatement<T> extends PreparableStatement {
             StringBuilder sb = new StringBuilder();
             sb.append("insert all");
             entities().forEach(e -> {
-                sb.append(" into ").append(table.sql(context));
+                sb.append(" into ").append(table.sql(localContext));
                 sb.append(" (");
-                sb.append(fieldValueExtractors().map(fve -> fve.field().sql(context)).collect(joining(", ")));
+                sb.append(fieldValueExtractors().map(fve -> fve.field().sql(localContext)).collect(joining(", ")));
                 sb.append(") values (");
-                sb.append(fieldValueExtractors().map(fve -> fve.valueSql(context, e)).collect(joining(", ")));
+                sb.append(fieldValueExtractors().map(fve -> fve.valueSql(localContext, e)).collect(joining(", ")));
                 sb.append(")");
             });
 
@@ -76,10 +76,10 @@ public class InsertBatchStatement<T> extends PreparableStatement {
             StringBuilder sb = new StringBuilder();
             sb.append("insert into ").append(table.sql(context));
             sb.append(" (");
-            sb.append(fieldValueExtractors().map(fve -> fve.field().sql(context)).collect(joining(", ")));
+            sb.append(fieldValueExtractors().map(fve -> fve.field().sql(localContext)).collect(joining(", ")));
             sb.append(") values ");
             sb.append(entities().map(e -> "("
-                    + fieldValueExtractors().map(fve -> fve.valueSql(context, e)).collect(joining(", "))
+                    + fieldValueExtractors().map(fve -> fve.valueSql(localContext, e)).collect(joining(", "))
                     + ")")
                     .collect(joining(", ")));
 

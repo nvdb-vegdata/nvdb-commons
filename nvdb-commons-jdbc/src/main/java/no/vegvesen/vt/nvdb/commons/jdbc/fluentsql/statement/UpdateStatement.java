@@ -82,17 +82,17 @@ public class UpdateStatement extends PreparableStatement {
 
     @Override
     String sql(Context context) {
-        context.command(UPDATE);
+        final Context localContext = context.withCommand(UPDATE);
         validate();
 
         StringBuilder sb = new StringBuilder();
         sb.append("update ");
         sb.append(table.sql(context));
         sb.append(" set ");
-        sb.append(fieldValues.stream().map(fv -> fv.field().sql(context) + " = " + fv.valueSql(context)).collect(joining(", ")));
+        sb.append(fieldValues.stream().map(fv -> fv.field().sql(localContext) + " = " + fv.valueSql(localContext)).collect(joining(", ")));
         if (!expressions.isEmpty()) {
             sb.append(" where ");
-            sb.append(expressions.stream().map(e -> e.sql(context)).collect(joining(" and ")));
+            sb.append(expressions.stream().map(e -> e.sql(localContext)).collect(joining(" and ")));
         }
 
         return sb.toString();

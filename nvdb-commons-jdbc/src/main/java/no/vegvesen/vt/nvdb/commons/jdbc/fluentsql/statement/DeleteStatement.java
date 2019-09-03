@@ -64,17 +64,17 @@ public class DeleteStatement extends PreparableStatement {
 
     @Override
     String sql(Context context) {
-        context.command(DELETE);
+        final Context localContext = context.withCommand(DELETE);
         validate();
 
         StringBuilder sb = new StringBuilder();
         sb.append("delete from ");
-        sb.append(fromTable.sql(context));
+        sb.append(fromTable.sql(localContext));
 
         if (!expressions.isEmpty()) {
             sb.append(" where ");
             sb.append(expressions.stream()
-                    .map(e -> e.sql(context))
+                    .map(e -> e.sql(localContext))
                     .collect(joining(" and ")));
         }
 

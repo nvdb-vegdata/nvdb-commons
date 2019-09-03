@@ -13,7 +13,9 @@ public class Like implements Expression {
 
     public Like(Field operand, String pattern) {
         this.operand = requireNonNull(operand, "No operand specified");
-        this.pattern = requireNonNull(pattern, "No pattern specified");
+
+        requireNonNull(pattern, "No pattern specified");
+        this.pattern = pattern.contains("%") ? pattern : "%" + pattern + "%";
     }
 
     @Override

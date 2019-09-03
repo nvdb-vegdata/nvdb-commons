@@ -18,11 +18,11 @@ public class TruncateStatement extends PreparableStatement {
 
     @Override
     String sql(Context context) {
-        context.command(TRUNCATE);
+        final Context localContext = context.withCommand(TRUNCATE);
 
         StringBuilder sb = new StringBuilder();
         sb.append("truncate table ");
-        sb.append(table.sql(context));
+        sb.append(table.sql(localContext));
 
         return sb.toString();
     }
