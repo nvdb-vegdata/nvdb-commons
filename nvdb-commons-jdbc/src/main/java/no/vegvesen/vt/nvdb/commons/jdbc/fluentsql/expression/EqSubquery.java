@@ -2,22 +2,19 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.SelectStatement;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
-public class EqSubQuery implements Expression {
+public class EqSubquery implements Expression {
     private final Field operand;
     private final Subquery subquery;
 
-    public EqSubQuery(Field operand, SelectStatement inner) {
+    public EqSubquery(Field operand, Subquery subquery) {
         this.operand = requireNonNull(operand, "No operand specified");
-
-        requireNonNull(inner, "No select statement specified");
-        this.subquery = new Subquery(inner);
+        this.subquery = requireNonNull(subquery, "No sub query specified");
     }
 
     @Override

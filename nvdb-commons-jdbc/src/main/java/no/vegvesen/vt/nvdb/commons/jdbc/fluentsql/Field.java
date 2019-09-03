@@ -2,7 +2,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Eq;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqField;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqSubQuery;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqSubquery;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Ge;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.GeField;
@@ -20,6 +20,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.SelectStatement;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -60,8 +61,9 @@ public class Field implements Projection {
         return new EqField(this, requireNonNull(other, "No field specified"));
     }
 
-    public Expression eq(SelectStatement subQuery) {
-        return new EqSubQuery(this, requireNonNull(subQuery, "No subquery specified"));
+    public Expression eq(SelectStatement inner) {
+        requireNonNull(inner, "No subquery specified");
+        return new EqSubquery(this, new Subquery(inner));
     }
 
     public Expression lt(Object value) {
