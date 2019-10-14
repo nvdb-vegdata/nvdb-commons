@@ -7,7 +7,7 @@
 
     <groupId>no.vegvesen.vt.nvdb.commons</groupId>
     <artifactId>nvdbcommons-jdbc</artifactId>
-    <version>1.12-SNAPSHOT</version>
+    <version>1.13-SNAPSHOT</version>
 
     <organization>
         <name>Statens vegvesen</name>
