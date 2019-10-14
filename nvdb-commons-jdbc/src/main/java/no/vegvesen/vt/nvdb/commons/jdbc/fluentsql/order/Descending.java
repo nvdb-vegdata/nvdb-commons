@@ -17,7 +17,7 @@ public class Descending implements Order {
 
     @Override
     public String sql(Context context) {
-        return projection.sql(context) + " desc";
+        return projection.alias() + " desc";
     }
 
     @Override

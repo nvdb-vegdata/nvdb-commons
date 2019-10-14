@@ -49,7 +49,7 @@ public class SelectStatementTest {
               + "and P.NAME is not null "
               + "and (A.ZIP = ? or A.ZIP = ?) "
               + "and A.COUNTRY in (?, ?, ?) "
-              + "order by P.SSN asc, P.NAME desc "
+              + "order by P_SSN asc, P_NAME desc "
               + "limit ? "
               + "offset ?";
 

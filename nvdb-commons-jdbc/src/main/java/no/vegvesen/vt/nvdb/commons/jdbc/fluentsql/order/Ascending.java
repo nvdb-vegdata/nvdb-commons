@@ -15,9 +15,9 @@ public class Ascending implements Order {
         this.projection = requireNonNull(projection, "No projection specified");
     }
 
-    @Override                                      // ??? field or alias ???
+    @Override
     public String sql(Context context) {
-        return projection.sql(context) + " asc";
+        return projection.alias() + " asc";
     }
 
     @Override
