@@ -1,7 +1,10 @@
 package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Ascending;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
+import sun.security.krb5.internal.crypto.Des;
 
 import java.util.Optional;
 
@@ -10,14 +13,14 @@ public interface FieldFunction extends Function {
     Optional<Field> field();
 
     default Order ascIf(boolean condition) {
-        return field().get().ascIf(condition);
+        return condition ? asc() : desc();
     }
 
     default Order asc() {
-        return field().get().asc();
+        return new Ascending(this);
     }
 
     default Order desc() {
-        return field().get().desc();
+        return new Descending(this);
     }
 }

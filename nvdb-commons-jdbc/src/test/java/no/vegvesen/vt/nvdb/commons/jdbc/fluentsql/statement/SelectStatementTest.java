@@ -174,20 +174,22 @@ public class SelectStatementTest {
     }
 
     @Test
-    public void shouldHandleAggregatesWithGrouping() {
+    public void shouldHandleAggregatesWithGroupingAndOrdering() {
         PreparableStatement statement =
-                select(PERSON.NAME, max(ADDRESS.ZIP).as("MAX_ZIP"))
+                select(PERSON.NAME, max(ADDRESS.ZIP))
                         .from(ADDRESS)
                         .join(ADDRESS.PERSON_ID.on(PERSON.ID))
                         .where(PERSON.SSN.eq("17016812345"))
-                        .groupBy(PERSON.NAME);
+                        .groupBy(PERSON.NAME)
+                        .orderBy(max(ADDRESS.ZIP).asc());
 
         final String expectedSql =
-                "select P.NAME P_NAME, max(A.ZIP) MAX_ZIP "
+                "select P.NAME P_NAME, max(A.ZIP) MAX_A_ZIP "
                         + "from ADDRESS A "
                         + "inner join PERSON P on A.PERSON_ID = P.ID "
                         + "where P.SSN = ? "
-                        + "group by P.NAME";
+                        + "group by P.NAME "
+                        + "order by MAX_A_ZIP asc";
         final List<Object> expectedParams = singletonList("17016812345");
 
         assertThat(statement.sql(context()), equalTo(expectedSql));
