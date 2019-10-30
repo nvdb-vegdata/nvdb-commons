@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -27,7 +28,7 @@ public final class Functions {
     }
 
     /**
-     * Applies mapper if input is non-null
+     * Returns function that applies given mapper if input is non-null.
      * @param mapper the mapper to invoke
      * @param <S> the input object type
      * @param <T> the output object type
@@ -37,11 +38,28 @@ public final class Functions {
         return s -> nonNull(s) ? mapper.apply(s) : (T)null;
     }
 
+    /**
+     * Returns a null-safe function that splits input string on given regular expression.
+     * @param regex the regular expression to split on
+     * @return the function object
+     */
     public static Function<String, List<String>> split(String regex) {
         return ifNonNull(s -> StringHelper.split(s, regex));
     }
 
+    /**
+     * Returns null-safe binary operator that returns the earliest of two dates.
+     * @return the binary operator function object
+     */
     public static BinaryOperator<LocalDate> earliestDate() {
-        return (a, b) -> a == null ? b : (b == null ? a : (a.compareTo(b) < 0 ? a : b));
+        return (a, b) -> isNull(a) ? b : (isNull(b) ? a : (a.compareTo(b) < 0 ? a : b));
+    }
+
+    /**
+     * Returns null-safe binary operator that returns the latest of two dates.
+     * @return the binary operator function object
+     */
+    public static BinaryOperator<LocalDate> latestDate() {
+        return (a, b) -> isNull(a) ? b : (isNull(b) ? a : (a.compareTo(b) > 0 ? a : b));
     }
 }
