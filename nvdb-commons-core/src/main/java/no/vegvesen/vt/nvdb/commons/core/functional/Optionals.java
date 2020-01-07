@@ -18,4 +18,8 @@ public class Optionals {
     public static <T, U> U mapIfNonNull(T value, Function<T, U> mapper) {
         return Optional.ofNullable(value).map(mapper).orElse(null);
     }
+
+    public static <T, U> U mapOrDefault(T value, Function<T, U> mapper, U defaultValue) {
+        return Optional.ofNullable(value).map(mapper).orElse(defaultValue);
+    }
 }
