@@ -46,7 +46,7 @@ public final class Predicates {
      * @param clazz the class to test instance on
      * @return the predicate
      */
-    public static <T> Predicate<? super T> instanceOf(Class<?> clazz) {
+    public static <T> Predicate<? super T> instanceOf(Class<? extends T> clazz) {
         return clazz::isInstance;
     }
 
