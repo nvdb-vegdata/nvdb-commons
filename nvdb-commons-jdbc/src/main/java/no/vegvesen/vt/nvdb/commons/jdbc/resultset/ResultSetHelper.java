@@ -2,6 +2,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.resultset;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -119,6 +120,14 @@ public class ResultSetHelper {
 
     public static ResultSetRowMapper<LocalDateTime> toLocalDateTime(String alias) {
         return rsi -> rsi.getLocalDateTimeOrNull(alias);
+    }
+
+    public static ResultSetRowMapper<InputStream> toInputStream(Field field) {
+        return rsi -> rsi.getInputStreamOrNull(field.alias());
+    }
+
+    public static ResultSetRowMapper<InputStream> toInputStream(String alias) {
+        return rsi -> rsi.getInputStreamOrNull(alias);
     }
 
     @FunctionalInterface

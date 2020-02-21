@@ -2,6 +2,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.resultset;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -286,6 +287,29 @@ public class ResultSetInspector {
 
     public byte[] getBytesOrNull(String columnName) {
         return getBytes(columnName).orElse(null);
+    }
+
+    //
+    // InputStream
+    //
+
+    public Optional<InputStream> getInputStream(Field field) {
+        return getInputStream(field.alias());
+    }
+
+    public InputStream getInputStreamOrNull(Field field) {
+        return getInputStream(field).orElse(null);
+    }
+
+    public Optional<InputStream> getInputStream(String columnName) {
+        return wrapSqlException(() -> {
+            InputStream value = rs.getBinaryStream(columnName);
+            return Optional.ofNullable(value);
+        });
+    }
+
+    public InputStream getInputStreamOrNull(String columnName) {
+        return getInputStream(columnName).orElse(null);
     }
 
     //
