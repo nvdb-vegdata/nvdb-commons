@@ -5,6 +5,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.Dialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,6 +48,8 @@ public class PreparedStatementBuilder {
                 stmt.setObject(i, param.toString());
             } else if (param instanceof Enum) {
                 stmt.setObject(i, ((Enum)param).name());
+            } else if (param instanceof InputStream) {
+                stmt.setBinaryStream(i, (InputStream)param);
             } else {
                 stmt.setObject(i, param);
             }

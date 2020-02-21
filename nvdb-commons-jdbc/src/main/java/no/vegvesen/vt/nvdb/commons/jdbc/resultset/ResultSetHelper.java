@@ -3,6 +3,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.resultset;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 
 import java.io.InputStream;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -16,6 +17,10 @@ import java.util.function.Consumer;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Optionals.mapIfNonNull;
 
 public class ResultSetHelper {
+
+    public static ResultSetMapper<Boolean> nonEmptyResultSet() {
+        return ResultSet::next;
+    }
 
     public static ResultSetMapper<Void> forEach(Consumer<ResultSetInspector> consumer) {
         return rs -> {
