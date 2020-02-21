@@ -82,6 +82,10 @@ public class ResultSetHelper {
         return toSingleton(rsi -> rsi.getString(1).orElseThrow(ResultSetHelper::emptyResultSet));
     }
 
+    public static ResultSetMapper<List<String>> toStringList() {
+        return toObjectList(rsi -> rsi.getString(1).orElseThrow(ResultSetHelper::emptyResultSet));
+    }
+
     public static ResultSetRowMapper<Integer> toInteger(Field field) {
         return toInteger(field.alias());
     }
