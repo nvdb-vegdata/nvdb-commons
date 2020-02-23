@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static no.vegvesen.vt.nvdb.commons.core.functional.Optionals.mapIfNonNull;
 
@@ -75,6 +76,10 @@ public class ResultSetHelper {
         };
     }
 
+    public static ResultSetMapper<Boolean> toSingleBoolean() {
+        return toSingleton(rsi -> rsi.getBoolean(1).orElseThrow(ResultSetHelper::emptyResultSet));
+    }
+
     public static ResultSetMapper<Integer> toSingleInteger() {
         return toSingleton(rsi -> rsi.getInt(1).orElseThrow(ResultSetHelper::emptyResultSet));
     }
@@ -89,6 +94,14 @@ public class ResultSetHelper {
 
     public static ResultSetMapper<List<String>> toStringList() {
         return toObjectList(rsi -> rsi.getString(1).orElseThrow(ResultSetHelper::emptyResultSet));
+    }
+
+    public static ResultSetRowMapper<Boolean> toBoolean(Field field) {
+        return toBoolean(field.alias());
+    }
+
+    public static ResultSetRowMapper<Boolean> toBoolean(String alias) {
+        return rsi -> rsi.getBooleanOrNull(alias);
     }
 
     public static ResultSetRowMapper<Integer> toInteger(Field field) {
@@ -113,6 +126,22 @@ public class ResultSetHelper {
 
     public static ResultSetRowMapper<String> toString(String alias) {
         return rsi -> rsi.getStringOrNull(alias);
+    }
+
+    public static <T extends Enum<T>> ResultSetRowMapper<T> toEnum(Field field, Class<T> enumType) {
+        return toEnum(field.alias(), enumType);
+    }
+
+    public static <T extends Enum<T>> ResultSetRowMapper<T> toEnum(String alias, Class<T> enumType) {
+        return rsi -> rsi.getEnumOrNull(alias, enumType);
+    }
+
+    public static <T extends Enum<T>> ResultSetRowMapper<T> toEnum(Field field, Function<String, T> mapper) {
+        return toEnum(field.alias(), mapper);
+    }
+
+    public static <T extends Enum<T>> ResultSetRowMapper<T> toEnum(String alias, Function<String, T> mapper) {
+        return rsi -> rsi.getEnumOrNull(alias, mapper);
     }
 
     public static ResultSetRowMapper<UUID> toUuid(Field field) {

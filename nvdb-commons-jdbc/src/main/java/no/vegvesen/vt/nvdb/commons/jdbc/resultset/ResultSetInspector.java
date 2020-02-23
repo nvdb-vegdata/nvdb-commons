@@ -47,6 +47,13 @@ public class ResultSetInspector {
         return getBoolean(columnName).orElse(null);
     }
 
+    public Optional<Boolean> getBoolean(int columnIndex) {
+        return wrapSqlException(() -> {
+            Boolean value = rs.getBoolean(columnIndex);
+            return rs.wasNull() ? Optional.empty() : Optional.of(value);
+        });
+    }
+
     //
     // Int
     //
