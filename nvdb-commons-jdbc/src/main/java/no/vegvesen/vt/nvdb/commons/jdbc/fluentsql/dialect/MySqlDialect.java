@@ -19,6 +19,11 @@ public class MySqlDialect implements Dialect {
     }
 
     @Override
+    public String getToNumberFunction(String operand, int precision, int scale) {
+        return "cast(" + operand + " as decimal(" + precision + "," + scale + "))";
+    }
+
+    @Override
     public boolean supports(Capability capability) {
         return supportedCaps.contains(capability);
     }

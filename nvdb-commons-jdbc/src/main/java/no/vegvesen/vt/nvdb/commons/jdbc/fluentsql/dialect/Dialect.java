@@ -9,6 +9,12 @@ public interface Dialect {
 
     Optional<String> getRowNumLiteral();
 
+    /**
+     * @param precision the precision that represents the number of significant digits
+     * @param scale the scale that that represents the number of digits after the decimal point. Must be less than or equal to the precision.
+     */
+    String getToNumberFunction(String operand, int precision, int scale);
+
     boolean supports(Capability capability);
 
     static Dialect fromConnection(Connection connection) {

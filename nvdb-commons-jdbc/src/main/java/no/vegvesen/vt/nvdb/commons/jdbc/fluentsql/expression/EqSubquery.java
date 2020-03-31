@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class EqSubquery implements Expression {
-    private final Field operand;
+    private final LeftOperand operand;
     private final Subquery subquery;
 
-    public EqSubquery(Field operand, Subquery subquery) {
+    public EqSubquery(LeftOperand operand, Subquery subquery) {
         this.operand = requireNonNull(operand, "No operand specified");
         this.subquery = requireNonNull(subquery, "No sub query specified");
     }
@@ -34,6 +34,6 @@ public class EqSubquery implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(operand);
+        return operand.fields();
     }
 }

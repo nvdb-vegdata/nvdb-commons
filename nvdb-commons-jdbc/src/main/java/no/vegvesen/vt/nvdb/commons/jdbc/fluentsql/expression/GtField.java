@@ -8,10 +8,10 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class GtField implements Expression {
-    private final Field left;
+    private final LeftOperand left;
     private final Field right;
 
-    public GtField(Field left, Field right) {
+    public GtField(LeftOperand left, Field right) {
         this.left = requireNonNull(left, "No left field specified");
         this.right = requireNonNull(right, "No right field specified");
     }
@@ -33,6 +33,6 @@ public class GtField implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(left, right);
+        return Stream.concat(left.fields(), Stream.of(right));
     }
 }

@@ -5,8 +5,11 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Join;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Table;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.PostgreSqlDialect;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.OptionalExpression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.FieldFunction;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.AggregateFunction;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
@@ -14,7 +17,6 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -27,6 +29,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper.isEmpty;
+import static no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper.nonEmpty;
 import static no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper.streamIfNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.require;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
@@ -50,6 +53,7 @@ public class SelectStatement extends PreparableStatement {
     private boolean distinct;
     private Long limit;
     private Long offset;
+    private boolean forUpdate;
 
     SelectStatement(boolean distinct, List<Projection> projections, List<Table> tables) {
         this.distinct = distinct;
@@ -60,6 +64,7 @@ public class SelectStatement extends PreparableStatement {
         this.expressions = new LinkedList<>();
         this.groups = new LinkedList<>();
         this.orders = new LinkedList<>();
+        this.forUpdate = false;
     }
 
     SelectStatement(boolean distinct, List<Projection> projections, Subquery subqueryFrom) {
@@ -71,6 +76,7 @@ public class SelectStatement extends PreparableStatement {
         this.expressions = new LinkedList<>();
         this.groups = new LinkedList<>();
         this.orders = new LinkedList<>();
+        this.forUpdate = false;
     }
 
     public SelectStatement join(Join... joins) {
@@ -78,6 +84,16 @@ public class SelectStatement extends PreparableStatement {
         require(() -> isNull(subqueryFrom), "Can't combine a subquery 'from' clause with joins");
         this.joins.addAll(asList(joins));
         return this;
+    }
+
+    public SelectStatement leftOuterJoin(Join join) {
+        requireNonNull(join, "No join specified");
+        return join(join.leftOuter());
+    }
+
+    public SelectStatement rightOuterJoin(Join join) {
+        requireNonNull(join, "No join specified");
+        return join(join.rightOuter());
     }
 
     @SafeVarargs
@@ -107,9 +123,9 @@ public class SelectStatement extends PreparableStatement {
      * @return this object, for method chaining
      */
     @SafeVarargs
-    public final SelectStatement where(Optional<Expression>... maybeExpressions) {
+    public final SelectStatement where(OptionalExpression... maybeExpressions) {
         requireNonEmpty(maybeExpressions, "No expressions specified");
-        Arrays.stream(maybeExpressions).flatMap(Optionals::stream).forEach(this.expressions::add);
+        Arrays.stream(maybeExpressions).flatMap(OptionalExpression::stream).forEach(this.expressions::add);
         return this;
     }
 
@@ -146,6 +162,11 @@ public class SelectStatement extends PreparableStatement {
 
     public SelectStatement offset(long offset) {
         this.offset = offset;
+        return this;
+    }
+
+    public SelectStatement forUpdate() {
+        this.forUpdate = true;
         return this;
     }
 
@@ -223,6 +244,10 @@ public class SelectStatement extends PreparableStatement {
             }
         }
 
+        if (forUpdate) {
+            sb.append(" for update");
+        }
+
         return sb.toString();
     }
 
@@ -295,6 +320,12 @@ public class SelectStatement extends PreparableStatement {
         validateFieldTableRelations(expressions.stream().flatMap(Expression::fields));
         validateFieldTableRelations(groups.stream());
         validateFieldTableRelations(orders.stream().flatMap(Order::fields));
+
+        if (forUpdate) {
+            if (distinct || nonEmpty(groups) || projections.stream().anyMatch(instanceOf(AggregateFunction.class))) {
+                throw new IllegalStateException("SELECT ... FOR UPDATE can't be used with DISTINCT, GROUP BY or aggregates");
+            }
+        }
     }
 
     private void validateFieldTableRelations(Stream<Field> fields) {

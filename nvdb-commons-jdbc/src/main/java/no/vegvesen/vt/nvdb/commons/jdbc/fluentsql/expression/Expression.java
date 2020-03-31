@@ -18,15 +18,23 @@ public interface Expression extends Sql {
         return LogicalOperators.or(this, other);
     }
 
+    default OptionalExpression or(OptionalExpression maybeOther) {
+        if (maybeOther.isPresent()) {
+            return OptionalExpression.of(LogicalOperators.or(this, maybeOther.get()));
+        } else {
+            return OptionalExpression.of(this);
+        }
+    }
+
     default Expression and(Expression other) {
         return LogicalOperators.and(this, other);
     }
 
-    default Expression and(Optional<Expression> other) {
-        if (other.isPresent()) {
-            return LogicalOperators.and(this, other.get());
+    default OptionalExpression and(OptionalExpression maybeOther) {
+        if (maybeOther.isPresent()) {
+            return OptionalExpression.of(LogicalOperators.and(this, maybeOther.get()));
         } else {
-            return this;
+            return OptionalExpression.of(this);
         }
     }
 }

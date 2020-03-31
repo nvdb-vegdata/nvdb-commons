@@ -8,12 +8,12 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class Ge implements Expression {
-    private final Field operand;
+    private final LeftOperand operand;
     private final Object value;
 
-    public Ge(Field operand, Object value) {
+    public Ge(LeftOperand operand, Object value) {
         if (value instanceof Field) {
-            throw new IllegalArgumentException("Use GeField instead");
+            throw new IllegalArgumentException("Use GeField for expressions with field as right operand");
         }
         this.operand = requireNonNull(operand, "No operand specified");
         this.value = requireNonNull(value, "No value specified");
@@ -36,6 +36,6 @@ public class Ge implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(operand);
+        return operand.fields();
     }
 }

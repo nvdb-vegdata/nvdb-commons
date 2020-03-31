@@ -12,9 +12,11 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.In;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.IsNull;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Le;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LeField;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LeftOperand;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Like;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Lt;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LtField;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.OptionalExpression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Ascending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
@@ -24,6 +26,7 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -31,7 +34,7 @@ import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Command.SELECT;
 
-public class Field implements Projection {
+public class Field implements Projection, LeftOperand {
     private final Table table;
     private final String name;
     private String alias;
@@ -48,112 +51,9 @@ public class Field implements Projection {
         return this;
     }
 
-    public Expression eq(Object value) {
-        return new Eq(this, requireNonNull(value, "No value specified"));
-    }
-
-    public Optional<Expression> eq(Optional<?> value) {
-        requireNonNull(value, "No value specified");
-        return value.map(v -> new Eq(this, v));
-    }
-
-    public Expression eq(Field other) {
-        return new EqField(this, requireNonNull(other, "No field specified"));
-    }
-
-    public Expression eq(SelectStatement inner) {
-        requireNonNull(inner, "No subquery specified");
-        return new EqSubquery(this, new Subquery(inner));
-    }
-
-    public Expression lt(Object value) {
-        return new Lt(this, requireNonNull(value, "No value specified"));
-    }
-
-    public Optional<Expression> lt(Optional<?> value) {
-        requireNonNull(value, "No value specified");
-        return value.map(v -> new Lt(this, v));
-    }
-
-    public Expression lt(Field other) {
-        return new LtField(this, requireNonNull(other, "No field specified"));
-    }
-
-    public Expression le(Object value) {
-        return new Le(this, requireNonNull(value, "No value specified"));
-    }
-
-    public Optional<Expression> le(Optional<?> value) {
-        requireNonNull(value, "No value specified");
-        return value.map(v -> new Le(this, v));
-    }
-
-    public Expression le(Field other) {
-        return new LeField(this, requireNonNull(other, "No field specified"));
-    }
-
-    public Expression gt(Object value) {
-        return new Gt(this, requireNonNull(value, "No value specified"));
-    }
-
-    public Optional<Expression> gt(Optional<?> value) {
-        requireNonNull(value, "No value specified");
-        return value.map(v -> new Gt(this, v));
-    }
-
-    public Expression gt(Field other) {
-        return new GtField(this, requireNonNull(other, "No field specified"));
-    }
-
-    public Expression ge(Object value) {
-        return new Ge(this, requireNonNull(value, "No value specified"));
-    }
-
-    public Optional<Expression> ge(Optional<?> value) {
-        requireNonNull(value, "No value specified");
-        return value.map(v -> new Ge(this, v));
-    }
-
-    public Expression ge(Field other) {
-        return new GeField(this, requireNonNull(other, "No field specified"));
-    }
-
-    public Expression in(Object... values) {
-        requireNonEmpty(values, "No values specified");
-        if (values.length == 1) {
-            return new Eq(this, values[0]);
-        } else {
-            return new In(this, asList(values));
-        }
-    }
-
-    public Expression in(Collection<?> values) {
-        requireNonEmpty(values, "No values specified");
-        if (values.size() == 1) {
-            return new Eq(this, values.iterator().next());
-        } else {
-            return new In(this, values);
-        }
-    }
-
-    public Optional<Expression> in(Optional<? extends Collection<?>> values) {
-        requireNonNull(values, "No values specified");
-        return values.map(v -> {
-            if (v.size() == 1) {
-                return new Eq(this, v.iterator().next());
-            } else {
-                return new In(this, v);
-            }
-        });
-    }
-
-    public Expression like(String pattern) {
-        return new Like(this, requireNonNull(pattern, "No pattern specified"));
-    }
-
-    public Optional<Expression> like(Optional<String> pattern) {
-        requireNonNull(pattern, "No pattern specified");
-        return pattern.map(p -> new Like(this, p));
+    @Override
+    public Stream<Field> fields() {
+        return Stream.of(this);
     }
 
     public Expression isNull() {

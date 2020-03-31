@@ -16,6 +16,7 @@ import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.datamodel.TestDataModel
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LogicalOperators.not;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Aggregates.countAll;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.aggregate.Aggregates.max;
+import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.singlerow.SingleRowFunctions.upper;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.Statements.select;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +28,7 @@ public class SelectStatementTest {
     @Before
     public void setup() {
         statement =
-            select(PERSON.NAME, PERSON.SSN, ADDRESS.STREET, ADDRESS.ZIP, nullValue().forField(ADDRESS.COUNTRY))
+            select(upper(PERSON.NAME), PERSON.SSN, ADDRESS.STREET, ADDRESS.ZIP, nullValue().forField(ADDRESS.COUNTRY))
                 .from(PERSON)
                 .join(PERSON.ID.on(ADDRESS.PERSON_ID).leftOuter())
                 .where(PERSON.SSN.eq("17016812345")
@@ -42,7 +43,7 @@ public class SelectStatementTest {
     @Test
     public void shouldBuildValidSql() {
         final String expectedSql =
-                "select P.NAME P_NAME, P.SSN P_SSN, A.STREET A_STREET, A.ZIP A_ZIP, null A_COUNTRY "
+                "select upper(P.NAME) UPPER_P_NAME, P.SSN P_SSN, A.STREET A_STREET, A.ZIP A_ZIP, null A_COUNTRY "
               + "from PERSON P "
               + "left outer join ADDRESS A on P.ID = A.PERSON_ID "
               + "where P.SSN = ? "

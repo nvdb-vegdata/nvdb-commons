@@ -8,12 +8,12 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class Lt implements Expression {
-    private final Field operand;
+    private final LeftOperand operand;
     private final Object value;
 
-    public Lt(Field operand, Object value) {
+    public Lt(LeftOperand operand, Object value) {
         if (value instanceof Field) {
-            throw new IllegalArgumentException("Use LtField instead");
+            throw new IllegalArgumentException("Use LtField for expressions with field as right operand");
         }
         this.operand = requireNonNull(operand, "No operand specified");
         this.value = requireNonNull(value, "No value specified");
@@ -36,6 +36,6 @@ public class Lt implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(operand);
+        return operand.fields();
     }
 }

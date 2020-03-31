@@ -3,6 +3,7 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect;
 import java.util.EnumSet;
 import java.util.Optional;
 
+import static no.vegvesen.vt.nvdb.commons.core.lang.StringHelper.generate;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.Capability.LIMIT_OFFSET;
 
 public class PostgreSqlDialect implements Dialect {
@@ -16,6 +17,16 @@ public class PostgreSqlDialect implements Dialect {
     @Override
     public Optional<String> getRowNumLiteral() {
         return Optional.empty();
+    }
+
+    @Override
+    public String getToNumberFunction(String operand, int precision, int scale) {
+        String mask = generate("9", precision-scale, "");
+        if (scale > 0) {
+            mask = "." + generate("9", scale, "");
+        }
+
+        return "to_number(" + operand + ", '" + mask + "'";
     }
 
     @Override

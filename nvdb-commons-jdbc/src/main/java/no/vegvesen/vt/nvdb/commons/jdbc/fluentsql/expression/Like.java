@@ -8,10 +8,10 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class Like implements Expression {
-    private final Field operand;
+    private final LeftOperand operand;
     private final String pattern;
 
-    public Like(Field operand, String pattern) {
+    public Like(LeftOperand operand, String pattern) {
         this.operand = requireNonNull(operand, "No operand specified");
 
         requireNonNull(pattern, "No pattern specified");
@@ -35,6 +35,6 @@ public class Like implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(operand);
+        return operand.fields();
     }
 }

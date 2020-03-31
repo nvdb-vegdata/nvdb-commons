@@ -8,15 +8,15 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class Eq implements Expression {
-    private final Field operand;
+    private final LeftOperand operand;
     private final Object value;
 
-    public Eq(Field operand, Object value) {
+    public Eq(LeftOperand operand, Object value) {
         if (value instanceof Field) {
-            throw new IllegalArgumentException("Use EqField for expressions with field operand");
+            throw new IllegalArgumentException("Use EqField for expressions with field as right operand");
         }
         this.operand = requireNonNull(operand, "No operand specified");
-        this.value = requireNonNull(value, "Use IsNull for expressions with SQL NULL operand");
+        this.value = requireNonNull(value, "Use IsNull for expressions with SQL NULL as right operand");
     }
 
     @Override
@@ -36,6 +36,6 @@ public class Eq implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(operand);
+        return operand.fields();
     }
 }

@@ -11,10 +11,10 @@ import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.Helpers.paramMarkers;
 
 public class In implements Expression {
-    private final Field operand;
+    private final LeftOperand operand;
     private final Collection<?> values;
 
-    public In(Field operand, Collection<?> values) {
+    public In(LeftOperand operand, Collection<?> values) {
         this.operand = requireNonNull(operand, "No operand specified");
         this.values = requireNonEmpty(values, "No values specified");
     }
@@ -36,6 +36,6 @@ public class In implements Expression {
 
     @Override
     public Stream<Field> fields() {
-        return Stream.of(operand);
+        return operand.fields();
     }
 }
