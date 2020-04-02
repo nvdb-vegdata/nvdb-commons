@@ -51,6 +51,14 @@ public final class StringHelper {
         return Arrays.asList(string.split(regex));
     }
 
+    public static String generate(String s, int count) {
+        StringBuilder b = new StringBuilder();
+        for (int t = 0; t < count; t++) {
+            b.append(s);
+        }
+        return b.toString();
+    }
+
     public static String generate(String s, int count, String delimiter) {
         StringBuilder b = new StringBuilder();
         for (int t = 0; t < count; t++) {
