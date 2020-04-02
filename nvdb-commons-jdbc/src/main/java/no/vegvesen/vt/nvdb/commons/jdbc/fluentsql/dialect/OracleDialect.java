@@ -20,12 +20,15 @@ public class OracleDialect implements Dialect {
 
     @Override
     public String getToNumberFunction(String operand, int precision, int scale) {
-        String mask = generate("9", precision-scale, "");
+        StringBuilder mask = new StringBuilder();
+        if (precision-scale > 0) {
+            mask.append(generate("9", precision-scale));
+        }
         if (scale > 0) {
-            mask = "." + generate("9", scale, "");
+            mask.append(".").append(generate("9", scale));
         }
 
-        return "to_number(" + operand + ", '" + mask + "'";
+        return "to_number(" + operand + ", '" + mask + "')";
     }
 
     @Override

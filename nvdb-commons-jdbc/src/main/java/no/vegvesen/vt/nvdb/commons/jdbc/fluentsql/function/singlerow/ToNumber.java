@@ -17,7 +17,7 @@ public class ToNumber implements SingleRowFunction {
     private String alias;
 
     public ToNumber(Field field, int precision, int scale) {
-        require(() -> precision >= 1, "scale must be 1 or greater");
+        require(() -> precision >= 1, "precision must be 1 or greater");
         require(() -> scale >= 0, "scale must be 0 or greater");
         require(() -> scale <= precision, "scale must be less than or equal precision");
 
