@@ -7,7 +7,7 @@
 
     <groupId>no.vegvesen.vt.nvdb.commons</groupId>
     <artifactId>nvdbcommons-jdbc</artifactId>
-    <version>1.23</version>
+    <version>1.24-SNAPSHOT</version>
 
     <organization>
         <name>Statens vegvesen</name>
@@ -17,7 +17,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:nvdb-vegdata/nvdb-commons.git</connection>
-        <tag>nvdbcommons-jdbc-1.23</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
