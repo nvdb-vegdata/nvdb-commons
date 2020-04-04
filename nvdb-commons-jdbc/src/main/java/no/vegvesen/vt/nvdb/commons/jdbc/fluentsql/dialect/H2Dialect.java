@@ -1,13 +1,11 @@
 package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect;
 
-import no.vegvesen.vt.nvdb.commons.core.lang.StringHelper;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
 import static no.vegvesen.vt.nvdb.commons.core.lang.StringHelper.generate;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.Capability.LIMIT_OFFSET;
 
@@ -40,5 +38,13 @@ public class H2Dialect implements Dialect {
     @Override
     public boolean supports(Capability capability) {
         return supportedCaps.contains(capability);
+    }
+
+    public static void setupCustomizations(Connection connection) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("CREATE ALIAS IF NOT EXISTS TO_NUMBER FOR \"no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.H2CustomFunctions.toNumber\"")) {
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to setup H2 customizations", e);
+        }
     }
 }
