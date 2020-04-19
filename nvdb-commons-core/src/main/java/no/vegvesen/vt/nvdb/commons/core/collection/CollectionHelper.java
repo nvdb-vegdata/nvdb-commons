@@ -1,5 +1,6 @@
 package no.vegvesen.vt.nvdb.commons.core.collection;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -172,7 +173,7 @@ public final class CollectionHelper {
     }
 
     public static <T> Predicate<T> existsInCollection(Collection <T> collection, BiPredicate<T, T> condition) {
-        return item -> collection.stream().anyMatch(collectionItem -> condition.test(collectionItem, item));
+        return item -> streamIfNonNull(collection).anyMatch(collectionItem -> condition.test(collectionItem, item));
     }
 
     /**
@@ -180,7 +181,7 @@ public final class CollectionHelper {
      * @throws IllegalArgumentException if the collection didn't contain any double values.
      */
     public static Double minValue(Collection<Double> collection) {
-        return collection.stream()
+        return streamIfNonNull(collection)
                 .mapToDouble(v -> v)
                 .min()
                 .orElseThrow(IllegalArgumentException::new);
@@ -191,7 +192,7 @@ public final class CollectionHelper {
      * @throws IllegalArgumentException if the collection didn't contain any double values.
      */
     public static Double maxValue(Collection<Double> collection) {
-        return collection.stream()
+        return streamIfNonNull(collection)
                 .mapToDouble(v -> v)
                 .max()
                 .orElseThrow(IllegalArgumentException::new);
@@ -208,7 +209,32 @@ public final class CollectionHelper {
      * @return true if the collections contain the same items; else false
      */
     public static boolean isSame(Collection<?> first, Collection<?> second) {
-        return first.size() == second.size() && first.containsAll(second);
+        if (isNull(first)) {
+            return isNull(second);
+        } else if (isNull(second)) {
+            return false;
+        } else {
+            return first.size() == second.size() && first.containsAll(second);
+        }
+    }
+
+    /**
+     * Returns true if the two collections contain the same items, but not necessarily in the same order.
+     * @param first the first collection
+     * @param second the second collection
+     * @param sameness the predicate to decide if two collection items are the same
+     * @return true if the collections contain the same items; else false
+     */
+    public static <T> boolean isSame(Collection<T> first, Collection<T> second, BiPredicate<T, T> sameness) {
+        if (isNull(first)) {
+            return isNull(second);
+        } else if (isNull(second)) {
+            return false;
+        } else if (first.size() != second.size()) {
+            return false;
+        } else {
+            return first.stream().allMatch(f -> second.stream().anyMatch(s -> sameness.test(f, s)));
+        }
     }
 
     /**
