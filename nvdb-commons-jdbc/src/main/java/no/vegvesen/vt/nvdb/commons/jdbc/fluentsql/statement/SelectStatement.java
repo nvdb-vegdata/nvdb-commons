@@ -5,7 +5,6 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Join;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Table;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.PostgreSqlDialect;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.OptionalExpression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.function.FieldFunction;
@@ -240,7 +239,13 @@ public class SelectStatement extends PreparableStatement {
                     sb.append(" offset ?");
                 }
             } else {
-                sb = addLimitOffsetFallback(context, sb, limit, offset);
+                Long rowFrom = mapIfNonNull(offset, o -> o + 1);
+                Long rowTo = mapIfNonNull(limit, l -> (nonNull(offset) ? offset : 0) + l);
+
+                sb = addLimitOffsetFallback(context, sb, rowFrom, rowTo);
+
+                offset = rowFrom;
+                limit = rowTo;
             }
         }
 
@@ -251,23 +256,20 @@ public class SelectStatement extends PreparableStatement {
         return sb.toString();
     }
 
-    private StringBuilder addLimitOffsetFallback(Context context, StringBuilder innerSql, Long limit, Long offset) {
+    private StringBuilder addLimitOffsetFallback(Context context, StringBuilder innerSql, Long rowFrom, Long rowTo) {
         String rowNum = context.getDialect().getRowNumLiteral().orElseThrow(
                 () -> new RuntimeException("Dialect " + context.getDialect().getProductName() + " has no ROWNUM literal"));
 
-        Long fromRow = mapIfNonNull(offset, o -> o + 1);
-        Long toRow = mapIfNonNull(limit, l -> (offset != null ? offset : 0) + l);
-
-        if (nonNull(fromRow) && nonNull(toRow)) {
+        if (nonNull(rowFrom) && nonNull(rowTo)) {
             String limitSql = "select original.*, {ROWNUM} row_no from ( " + innerSql.toString() + " ) original where {ROWNUM} <= ?";
             String offsetSql = "select * from ( " + limitSql + " ) where row_no >= ?";
             return new StringBuilder(offsetSql.replace("{ROWNUM}", rowNum));
         }
-        else if (nonNull(fromRow)) {
+        else if (nonNull(rowFrom)) {
             String offsetSql = "select * from ( " + innerSql.toString() + " ) where {ROWNUM} >= ?";
             return new StringBuilder(offsetSql.replace("{ROWNUM}", rowNum));
         }
-        else if (nonNull(toRow)) {
+        else if (nonNull(rowTo)) {
             String limitSql = "select * from ( " + innerSql.toString() + " ) where {ROWNUM} <= ?";
             return new StringBuilder(limitSql.replace("{ROWNUM}", rowNum));
         }
