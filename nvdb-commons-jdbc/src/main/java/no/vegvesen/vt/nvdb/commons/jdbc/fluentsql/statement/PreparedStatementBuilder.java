@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +45,10 @@ public class PreparedStatementBuilder {
         for (Object param : params) {
             if (param instanceof Instant) {
                 stmt.setTimestamp(i, Timestamp.from((Instant)param));
+            } else if (param instanceof LocalDateTime) {
+                stmt.setTimestamp(i, Timestamp.valueOf((LocalDateTime)param));
+            } else if (param instanceof LocalDate) {
+                stmt.setDate(i, Date.valueOf((LocalDate)param));
             } else if (param instanceof UUID) {
                 stmt.setObject(i, param.toString());
             } else if (param instanceof URI) {
