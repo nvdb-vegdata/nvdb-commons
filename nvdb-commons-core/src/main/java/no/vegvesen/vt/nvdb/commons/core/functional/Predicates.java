@@ -1,9 +1,12 @@
 package no.vegvesen.vt.nvdb.commons.core.functional;
 
+import no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -51,12 +54,21 @@ public final class Predicates {
     }
 
     /**
-     * Tests whether an object is contained in a container.
-     * @param collection the collection to test containment on
+     * Tests whether specified collection contains an object that equals the streamed object.
+     * @param collection the collection to test containment in
      * @return the predicate
      */
-    public static <T> Predicate<? super T> containedIn(Collection<? super T> collection) {
-        return collection::contains;
+    public static <T> Predicate<? super T> containedIn(Collection <? extends T> collection) {
+        return containedIn(collection, Objects::equals);
+    }
+
+    /**
+     * Tests whether specified collection contains an object that when input along with the streamed object satisfies the specified binary predicate.
+     * @param collection the collection to test containment in
+     * @return the predicate
+     */
+    public static <T> Predicate<? super T> containedIn(Collection <? extends T> collection, BiPredicate<? super T, ? super T> condition) {
+        return item -> CollectionHelper.streamIfNonNull(collection).anyMatch(collectionItem -> condition.test(collectionItem, item));
     }
 
     /**

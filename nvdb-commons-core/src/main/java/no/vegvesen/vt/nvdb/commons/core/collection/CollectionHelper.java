@@ -6,10 +6,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -20,6 +18,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 import static no.vegvesen.vt.nvdb.commons.core.functional.Functions.castTo;
+import static no.vegvesen.vt.nvdb.commons.core.functional.Predicates.not;
 
 /**
  * Helper functions for collections
@@ -162,17 +161,18 @@ public final class CollectionHelper {
 
     /**
      * Adds items from collection to set, returns true if any of the new items exist in the set or there are duplicates in list
+     * @return true if any items added already existed in the set or there were non-unique items in the collection
      */
     public static <T> boolean hasDuplicatesWhenAdding(Set<T> set, Collection<T> toAdd) {
         return toAdd.stream().map(set::add).anyMatch(b -> !b);
     }
 
-    public static <T> Predicate<T> existsInCollection(Collection <T> collection) {
-        return existsInCollection(collection, Objects::equals);
-    }
-
-    public static <T> Predicate<T> existsInCollection(Collection <T> collection, BiPredicate<T, T> condition) {
-        return item -> streamIfNonNull(collection).anyMatch(collectionItem -> condition.test(collectionItem, item));
+    /**
+     * Adds items from collection to set, returning duplicate items
+     * @return items added that already exist in the set or were non-unique in the collection
+     */
+    public static <T> Set<T> addAndReturnDuplicates(Set<T> set, Collection<T> toAdd) {
+        return toAdd.stream().filter(not(set::add)).collect(toSet());
     }
 
     /**
