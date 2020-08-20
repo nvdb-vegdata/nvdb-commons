@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
+
 public class Optionals {
     private Optionals() {}
 
@@ -21,5 +23,11 @@ public class Optionals {
 
     public static <T, U> U mapOrDefault(T value, Function<T, U> mapper, U defaultValue) {
         return Optional.ofNullable(value).map(mapper).orElse(defaultValue);
+    }
+
+    @SafeVarargs
+    public static <T> Optional<T> firstPresent(Optional<T>... optionals) {
+        requireNonNull(optionals, "optionals");
+        return Stream.of(optionals).flatMap(Optionals::stream).findFirst();
     }
 }
