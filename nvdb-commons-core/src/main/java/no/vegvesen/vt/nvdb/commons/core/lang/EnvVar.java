@@ -45,7 +45,7 @@ public class EnvVar {
     }
 
     public String getFullKey(String name) {
-        return (prefix + name).toUpperCase();
+        return (prefix + name).toUpperCase().replaceAll("\\.", "_");
     }
 
     private Optional<String> lookupVar(String name) {
