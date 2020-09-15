@@ -203,6 +203,7 @@ public final class CollectionHelper {
 
     /**
      * Returns true if the two collections contain the same items, but not necessarily in the same order.
+     * Both first and second collection might contain duplicates.
      * @param first the first collection
      * @param second the second collection
      * @return true if the collections contain the same items; else false
@@ -213,12 +214,13 @@ public final class CollectionHelper {
         } else if (isNull(second)) {
             return false;
         } else {
-            return first.size() == second.size() && first.containsAll(second);
+            return first.size() == second.size() && first.containsAll(second) && second.containsAll(first);
         }
     }
 
     /**
      * Returns true if the two collections contain the same items, but not necessarily in the same order.
+     * Both first and second collection might contain duplicates.
      * @param first the first collection
      * @param second the second collection
      * @param sameness the predicate to decide if two collection items are the same
@@ -232,12 +234,14 @@ public final class CollectionHelper {
         } else if (first.size() != second.size()) {
             return false;
         } else {
-            return first.stream().allMatch(f -> second.stream().anyMatch(s -> sameness.test(f, s)));
+            return first.stream().allMatch(f -> second.stream().anyMatch(s -> sameness.test(f, s))) &&
+                second.stream().allMatch(s -> first.stream().anyMatch(f -> sameness.test(s, f)));
         }
     }
 
     /**
      * Returns true if the two collections contain the same strings, regardless of casing, and not necessarily in the same order.
+     * Both first and second collection might contain duplicates.
      * @param first the first collection
      * @param second the second collection
      * @return true if the collections contain the same strings (case insensitive); else false
@@ -250,7 +254,8 @@ public final class CollectionHelper {
         } else if (first.size() != second.size()) {
             return false;
         } else {
-            return first.stream().allMatch(s -> containsIgnoreCase(second, s));
+            return first.stream().allMatch(f -> containsIgnoreCase(second, f)) &&
+                second.stream().allMatch(s -> containsIgnoreCase(first, s));
         }
     }
 }
