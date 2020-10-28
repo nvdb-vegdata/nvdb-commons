@@ -4,7 +4,6 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Field;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Ascending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
-import sun.security.krb5.internal.crypto.Des;
 
 import java.util.Optional;
 
