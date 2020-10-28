@@ -1,8 +1,12 @@
 package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.require;
 
 public class Join {
     private enum JoinMode {
@@ -15,14 +19,20 @@ public class Join {
         }
     }
 
-    private final Field left;
-    private final Field right;
+    private final List<Field> lefts = new ArrayList<>();
+    private final List<Field> rights = new ArrayList<>();
     private JoinMode mode;
 
     public Join(Field left, Field right) {
-        this.left = requireNonNull(left, "No left field specified");
-        this.right = requireNonNull(right, "No right field specified");
+        this.lefts.add(requireNonNull(left, "No left field specified"));
+        this.rights.add(requireNonNull(right, "No right field specified"));
         this.mode = JoinMode.INNER;
+    }
+
+    private Join(Collection<Field> lefts, Collection<Field> rights, JoinMode mode) {
+        this.lefts.addAll(lefts);
+        this.rights.addAll(rights);
+        this.mode = mode;
     }
 
     public Join leftOuter() {
@@ -35,15 +45,43 @@ public class Join {
         return this;
     }
 
+    public Join and(Join next) {
+        require(() -> this.lefts.get(0).table().equals(next.lefts.get(0).table()), "Left side of nested joins must belong to the same table");
+        require(() -> this.rights.get(0).table().equals(next.rights.get(0).table()), "Right side of nested joins must belong to the same table");
+
+        Collection<Field> lefts = new ArrayList<>(this.lefts);
+        lefts.addAll(next.lefts);
+        Collection<Field> rights = new ArrayList<>(this.rights);
+        rights.addAll(next.rights);
+
+        return new Join(lefts, rights, mode);
+    }
+
     public String sql(Context context) {
-        return mode.sql + " " + right.table().sql(context) + " on " + left.sql(context) + " = " + right.sql(context);
+        Table rightTable = this.rights.get(0).table();
+        StringBuilder sql = new StringBuilder()
+            .append(mode.sql)
+            .append(" ")
+            .append(rightTable.sql(context))
+            .append(" on ");
+
+        for (int i = 0; i < this.lefts.size(); i++) {
+            if (i > 0) {
+                sql.append(" and ");
+            }
+            sql.append(this.lefts.get(i).sql(context))
+                .append(" = ")
+                .append(this.rights.get(i).sql(context));
+        }
+
+        return sql.toString();
     }
 
     public Table joined() {
-        return right.table();
+        return rights.get(0).table();
     }
 
     public Stream<Field> fields() {
-        return Stream.of(left, right);
+        return Stream.concat(lefts.stream(), rights.stream());
     }
 }

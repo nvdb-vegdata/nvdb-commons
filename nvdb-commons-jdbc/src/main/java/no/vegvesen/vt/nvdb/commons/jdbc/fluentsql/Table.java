@@ -18,8 +18,7 @@ public class Table {
     }
 
     public Table as(String alias) {
-        this.alias = requireNonBlank(alias, "No alias specified");
-        return this;
+        return new Table(name, alias);
     }
 
     public Field field(String name) {

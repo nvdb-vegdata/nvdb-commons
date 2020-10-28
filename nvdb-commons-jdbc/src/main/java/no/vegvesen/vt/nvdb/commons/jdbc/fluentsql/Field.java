@@ -1,43 +1,23 @@
 package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql;
 
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Eq;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqField;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.EqSubquery;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Expression;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Ge;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.GeField;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Gt;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.GtField;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.In;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.IsNull;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Le;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LeField;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LeftOperand;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Like;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.Lt;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.LtField;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.expression.OptionalExpression;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Ascending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Descending;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.order.Order;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.projection.Projection;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement.SelectStatement;
-import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 
-import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank;
-import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Command.SELECT;
 
 public class Field implements Projection, LeftOperand {
     private final Table table;
     private final String name;
-    private String alias;
+    private final String alias;
 
     public Field(Table table, String name) {
         this.table = requireNonNull(table, "No table specified");
@@ -45,10 +25,15 @@ public class Field implements Projection, LeftOperand {
         this.alias = defaultAlias(table, name);
     }
 
+    private Field(Table table, String name, String alias) {
+        this.table = requireNonNull(table, "No table specified");
+        this.name = requireNonBlank(name, "No name specified");
+        this.alias = requireNonBlank(alias, "No alias specified");
+    }
+
     @Override
     public Projection as(String alias) {
-        this.alias = requireNonBlank(alias, "No alias specified");
-        return this;
+        return new Field(table, name, alias);
     }
 
     @Override

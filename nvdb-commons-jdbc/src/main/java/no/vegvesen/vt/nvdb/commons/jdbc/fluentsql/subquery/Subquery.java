@@ -10,16 +10,21 @@ import static java.util.Objects.requireNonNull;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank;
 
 public class Subquery implements Sql {
-    private SelectStatement selectStatement;
-    private String alias;
+    private final SelectStatement selectStatement;
+    private final String alias;
 
     public Subquery(SelectStatement selectStatement) {
         this.selectStatement = requireNonNull(selectStatement, "No select statement specified");
+        this.alias = null;
+    }
+
+    private Subquery(SelectStatement selectStatement, String alias) {
+        this.selectStatement = requireNonNull(selectStatement, "No select statement specified");
+        this.alias = requireNonBlank(alias, "No alias specified");
     }
 
     public Subquery as(String alias) {
-        this.alias = requireNonBlank(alias, "No alias specified");
-        return this;
+        return new Subquery(selectStatement, alias);
     }
 
     public String alias() {
