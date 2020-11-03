@@ -3,22 +3,25 @@ package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank;
 import static no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Command.SELECT;
 
-public class Table {
+public abstract class Table<ENTITY extends Table<?>> {
     private final String name;
-    private String alias;
+    private final String alias;
+    private final TableFactory<ENTITY> tableFactory;
 
-    protected Table(String name) {
+    protected Table(String name, TableFactory<ENTITY> tableFactory) {
         this.name = requireNonBlank(name, "No name specified");
         this.alias = defaultAlias(name);
+        this.tableFactory = tableFactory;
     }
 
-    protected Table(String name, String alias) {
+    protected Table(String name, String alias, TableFactory<ENTITY> tableFactory) {
         this.name = requireNonBlank(name, "No name specified");
         this.alias = requireNonBlank(alias, "No name specified");
+        this.tableFactory = tableFactory;
     }
 
-    public Table as(String alias) {
-        return new Table(name, alias);
+    public ENTITY as(String alias) {
+        return tableFactory.newInstance(alias);
     }
 
     public Field field(String name) {
@@ -43,5 +46,10 @@ public class Table {
 
     private String defaultAlias(String name) {
         return name;
+    }
+
+    @FunctionalInterface
+    public interface TableFactory<ENTITY> {
+        ENTITY newInstance(String alias);
     }
 }

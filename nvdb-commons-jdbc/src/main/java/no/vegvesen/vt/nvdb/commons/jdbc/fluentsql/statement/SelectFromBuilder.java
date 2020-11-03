@@ -6,8 +6,8 @@ import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.subquery.Subquery;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static no.vegvesen.vt.nvdb.commons.core.collection.CollectionHelper.asNonEmptyList;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.require;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonBlank;
 import static no.vegvesen.vt.nvdb.commons.core.contract.Requires.requireNonEmpty;
@@ -16,9 +16,9 @@ public class SelectFromBuilder {
     private boolean distinct;
     private List<Projection> projections;
 
-    SelectFromBuilder(boolean distinct, Projection... projections) {
+    SelectFromBuilder(boolean distinct, List<Projection> projections) {
         this.distinct = distinct;
-        this.projections = asList(requireNonEmpty(projections, "No projections specified"));
+        this.projections = requireNonEmpty(projections, "No projections specified");
 
         require(() -> !this.projections.contains(null), "Use nullValue() to provide an SQL NULL projection");
     }
@@ -28,8 +28,10 @@ public class SelectFromBuilder {
         return this;
     }
 
-    public SelectStatement from(Table... tables) {
-        return new SelectStatement(distinct, projections, asList(requireNonEmpty(tables, "No tables specified")));
+    public SelectStatement from(Table firstTable, Table... moreTables) {
+        requireNonNull(firstTable, "First table is null");
+        List<Table> tables = asNonEmptyList(firstTable, moreTables);
+        return new SelectStatement(distinct, projections, tables);
     }
 
     public SelectStatement from(SelectStatement inner) {

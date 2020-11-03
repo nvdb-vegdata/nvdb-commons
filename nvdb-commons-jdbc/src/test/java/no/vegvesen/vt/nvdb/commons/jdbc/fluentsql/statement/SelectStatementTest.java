@@ -1,6 +1,7 @@
 package no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.statement;
 
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.Context;
+import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.datamodel.PersonTable;
 import no.vegvesen.vt.nvdb.commons.jdbc.fluentsql.dialect.MySqlDialect;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,16 +86,18 @@ public class SelectStatementTest {
 
     @Test
     public void shouldHandleSubqueriesInExpressions() {
+        final PersonTable PERSON2 = PERSON.as("P2");
+
         PreparableStatement statement =
                 select(PERSON.NAME)
                         .from(PERSON)
                         .where(PERSON.NAME.eq(
-                                select(PERSON.NAME).from(PERSON).where(PERSON.SSN.eq("17016812345"))));
+                                select(PERSON2.NAME).from(PERSON2).where(PERSON2.SSN.eq("17016812345"))));
 
         final String expectedSql =
                 "select P.NAME P_NAME "
                         + "from PERSON P "
-                        + "where P.NAME = (select P.NAME P_NAME from PERSON P where P.SSN = ?)";
+                        + "where P.NAME = (select P2.NAME P2_NAME from PERSON P2 where P2.SSN = ?)";
         Object[] expectedParams = {"17016812345"};
 
         assertThat(statement.sql(context()), equalTo(expectedSql));
