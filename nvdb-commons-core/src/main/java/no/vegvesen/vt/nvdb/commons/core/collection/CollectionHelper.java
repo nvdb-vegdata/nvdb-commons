@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -39,6 +40,16 @@ public final class CollectionHelper {
             return new ArrayList<>();
         } else {
             return Arrays.stream(items).collect(toList());
+        }
+    }
+
+    @SafeVarargs
+    public static <T> List<T> asNonEmptyList(T firstItem, T... items) {
+        requireNonNull(firstItem, "firstItem");
+        if (isNull(items)) {
+            return asList(firstItem);
+        } else {
+            return Stream.concat(Stream.of(firstItem), Arrays.stream(items)).collect(toList());
         }
     }
 
