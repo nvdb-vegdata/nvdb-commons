@@ -22,12 +22,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>opensource.kantega.no</id>
-            <url>http://opensource.kantega.no/nexus/content/repositories/snapshots</url>
+            <id>svv-artifactory-snapshots</id>
+            <url>https://artrepo.vegvesen.no/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
         <repository>
-            <id>opensource.kantega.no</id>
-            <url>http://opensource.kantega.no/nexus/content/repositories/releases</url>
+            <id>svv-artifactory-releases</id>
+            <url>https://artrepo.vegvesen.no/artifactory/libs-release-local</url>
         </repository>
     </distributionManagement>
 
@@ -72,6 +72,42 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>svv-artifactory</id>
+            <repositories>
+                <repository>
+                    <id>svv-locallibs</id>
+                    <url>https://artrepo.vegvesen.no/artifactory/all-maven-repos</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
+            <id>kantega-nexus</id>
+            <repositories>
+                <repository>
+                    <id>opensource.kantega.no-locallibs</id>
+                    <url>https://opensource.kantega.no/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -107,30 +143,5 @@
             </plugins>
         </pluginManagement>
     </build>
-
-    <repositories>
-        <repository>
-            <id>opensource.kantega.no-locallibs</id>
-            <url>https://opensource.kantega.no/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>opensource.kantega.no-snapshots</id>
-            <name>Kantega OpenSource - Snapshots</name>
-            <url>https://opensource.kantega.no/nexus/content/repositories/snapshots/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
 </project>

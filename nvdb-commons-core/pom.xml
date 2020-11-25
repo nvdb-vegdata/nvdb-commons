@@ -17,17 +17,17 @@
 
     <scm>
         <connection>scm:git:git@github.com:nvdb-vegdata/nvdb-commons.git</connection>
-        <tag>nvdbcommons-core-1.8-SNAPSHOT</tag>
+        <tag>nvdbcommons-core-1.16-SNAPSHOT</tag>
     </scm>
 
     <distributionManagement>
         <snapshotRepository>
-            <id>opensource.kantega.no</id>
-            <url>http://opensource.kantega.no/nexus/content/repositories/snapshots</url>
+            <id>svv-artifactory-snapshots</id>
+            <url>https://artrepo.vegvesen.no/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
         <repository>
-            <id>opensource.kantega.no</id>
-            <url>http://opensource.kantega.no/nexus/content/repositories/releases</url>
+            <id>svv-artifactory-releases</id>
+            <url>https://artrepo.vegvesen.no/artifactory/libs-release-local</url>
         </repository>
     </distributionManagement>
 
@@ -86,6 +86,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
