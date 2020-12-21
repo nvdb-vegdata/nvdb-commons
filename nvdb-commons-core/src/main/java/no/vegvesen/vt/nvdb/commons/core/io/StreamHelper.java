@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * Helper functions for streams
@@ -15,7 +16,11 @@ public final class StreamHelper {
     private StreamHelper() {}
 
     public static String asString(InputStream stream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+        return asString(stream, Charset.defaultCharset());
+    }
+
+    public static String asString(InputStream stream, Charset charset) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, charset))) {
             StringBuilder sb = new StringBuilder();
             char[] buffer = new char[BUFFER_SIZE];
             int read;
